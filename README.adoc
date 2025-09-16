@@ -45,7 +45,7 @@ boom-blast/
     application.yml
   docs/
     README.adoc
-  assets/
+  images/
 ----
 
 == Thành phần hệ thống
