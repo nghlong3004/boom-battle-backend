@@ -36,16 +36,16 @@ image::images/architecture.png[alt="System Architecture",width=800,align=center]
 ----
 boom-blast/
   frontend/
-    src/org/nghlong3004/boombattle/frontend
+    src/org/nghlong3004/boombattle
     index.html
     vite.config.ts
   backend/
-    src/main/java/org/nghlong3004/boombattle/backend
+    src/main/java/org/nghlong3004/boombattle
+    src/main/resources
+    src/test/java/org/nghlong3004/boombattle
     pom.xml
-    application.yml
-  docs/
-    README.adoc
   images/
+  README.adoc
 ----
 
 == Thành phần hệ thống
