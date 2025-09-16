@@ -16,7 +16,7 @@ Mục tiêu:
 == Kiến trúc hệ thống
 Hệ thống chia thành 2 phần chính: **frontend** (game client) và **backend** (game server).
 
-image::images/architecture.png[alt="System Architecture",width=600,align=center]
+image::images/architecture.png[alt="System Architecture",width=800,align=center]
 
 == Công nghệ sử dụng
 * **Frontend**: Phaser 3, Vite, TypeScript
