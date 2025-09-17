@@ -1,0 +1,239 @@
+= High-Level Design – Boom Blast
+
+:sectnums:
+:icons: font
+:source-highlighter: coderay
+
+== Mục tiêu & Phạm vi
+* **Mục tiêu**
+** Gameplay đặt bom – nổ lan – phá tường – ăn item.
+** Multiplayer online.
+** Machine 3 cấp độ: Easy, Normal, Hard.
+* **Phạm vi**
+** Frontend: Phaser 3 (game client).
+** Backend: Spring Boot, Maven, WebSocket, MyBatis, PostgreSQL 17+.
+** Monitoring: Prometheus + Grafana.
+
+== Game Features & Entities
+=== Map/TileMap
+* Bản đồ được biểu diễn bằng grid 2 chiều: kích thước có thể cấu hình.
+* Các loại ô (TileType):
+** EMPTY — ô trống, người chơi và máy có thể di chuyển qua.
+** SOFT_WALL — tường mềm, có thể bị phá bằng nổ bom, không đi qua được trước khi bị phá.
+** HARD_WALL — tường cứng, không thể bị phá hoặc đi qua, ngăn nổ lan.
+** POWER_UP — ô có vật phẩm, sau khi người chơi hoặc máy đi qua hoặc đứng lên sẽ nhận vật phẩm đó.
+** SPAWN_POINT — các vị trí bắt đầu người chơi hoặc máy (player spawn).
+
+* Quy tắc sinh map (map generation):
+** Viền ngoài (boundary) gồm toàn HARD_WALL để giới hạn khu vực chơi.
+** Bố trí HARD_WALL theo pattern cố định để tạo cấu trúc không gian chiến thuật.
+** SOFT_WALL được rải ngẫu nhiên trong các ô còn trống, với một seed cấu hình nếu muốn map lặp lại được.
+** Đảm bảo tính khả thi (playability): không để spawn point bị kẹt / không thể tiếp cận lẫn nhau.
+** Vật phẩm (POWER_UP) spawn khi phá các SOFT_WALL với xác suất (drop rate) có thể cấu hình.
+
+* Tệp map: JSON/TMX (Tiled) kèm tileset, load ở client.
+
+=== Player & Machine
+[cols]
+|===
+  | Thuộc tính | Giải thích
+  | id | định danh duy nhất (String/UUID)
+  | name | tên người chơi (user name) hoặc tên Machine
+  | type | HUMAN hoặc BOT (machine)
+  | position | tọa độ tile (x, y) + offset
+  | direction | hướng hiện tại (UP, DOWN, LEFT, RIGHT)
+  | speed | tốc độ di chuyển (số ô/giờ/tick)
+  | bombsAvailable | số bom có thể đặt đồng thời
+  | bombPower | bán kính nổ (số ô)
+  | status | boolean: đang sống hay đã bị loại
+  | score | điểm số hiện tại
+  | attribute | các đặc tính bổ sung từ power-up (ví dụ tăng tốc, tạo bom xuyên tường mềm, qua bom, vân vân)
+|===
+
+* Phương thức / hành vi chung (behaviors):
+** move(direction) — di chuyển, xử lý va chạm
+** placeBomb() — đặt bom nếu còn bombsAvailable > 0
+** onExplosionHit() — khi bị trúng nổ → chết hoặc mất shield
+** pickPowerUp(powerUp) — nhận vật phẩm thay đổi thuộc tính
+
+* Thuộc tính bổ sung của Machine:
+** difficultyLevel — EASY / NORMAL / HARD
+** MachineStrategy — object triển khai (Strategy) quyết định như EASY / NORMAL / HARD
+* Hành vi tùy thuộc độ khó:
+** EASY: hành động đơn giản, không tính toán sâu, random move;
+** NORMAL: tìm đường có khả năng, né nguy hiểm, ăn item, sử dụng BFS/DFS;
+** HARD: heuristic, danger map, A*, tính đặt bom & escape, ưu tiên lợi thế.
+
+=== Rules of the game
+* Mỗi trận đấu bắt đầu khi tất cả người chơi đã vào phòng / sẵn sàng.
+* Người chơi bị loại khi bị trúng nổ (nếu không có shield).
+* Trận đấu kết thúc khi còn 0 hoặc 1 người sống hoặc hết thời gian.
+* Người sống cuối cùng thắng, nếu không ai sống → hòa.
+* Có thể chơi nhiều round nếu muốn (Best-of-N).
+
+=== Bom (Bomb) và nổ (Explosion)
+[cols="20,80"]
+|===
+| Thuộc tính | `id`, `ownerId`, `x`, `y`, `placedAtMs`, `fuseMs`, `power`
+| Kíp nổ (fuse) | Cấu hình
+| Bán kính (radius/power) | Cấu hình hoặc tăng bằng item
+| Lan nổ | 4 hướng; dừng khi gặp HARD_WALL; phá và dừng tại SOFT_WALL đầu tiên
+| Sát thương | Người chơi đứng trong tia nổ bị loại (hoặc trừ mạng nếu có “shield”)
+| Xích bom | Explosion kích hoạt các bom khác nếu trúng tia nổ
+|===
+
+=== Vật phẩm (Power-up)
+[cols="25,75"]
+|===
+| MORE_BOMBS | tăng `bombsAvailable` tối đa đồng thời
+| MORE_POWER | tăng bán kính nổ `power`
+| SPEED | tăng `speed` (ô/tick)
+| SHIELD | chịu 1 lần nổ
+| WALL_PASS | Đi xuyên tường
+|===
+
+* Spawn: xác suất khi phá SOFT_WALL, cấu hình `powerup.drop-rate.*`.
+
+=== Luật thắng thua (Win Conditions)
+* **Last-man-standing**: người/cuối cùng còn sống thắng.
+* **Hòa**: hết thời gian vòng (round) hoặc tất cả bị loại cùng tick.
+* **Match**: best-of-N rounds (cấu hình).
+
+=== Tham số gameplay mặc định (Config Keys)
+[cols]
+|===
+| Khóa (key) | Mặc định | Ghi chú
+| `game.tick-rate` | 20 | Hz (ticks/giây)
+| `bomb.fuse-ms` | 2000 | thời gian kíp nổ
+| `bomb.base-power` | 2 | bán kính bắt đầu
+| `player.base-speed` | 1 | tile/tick
+| `powerup.drop-rate.soft-wall` | 0.3 | xác suất rơi item
+| `machine.alpha` | 40 | hệ số rủi ro trong A* (danger weight)
+| `match.round-time-sec` | 120 | thời lượng mỗi round
+|===
+
+== Kiến trúc tổng thể
+image::images/architecture.png[alt="System Architecture",width=600,align=center]
+
+* **Client (Phaser 3)**: render, input, prediction, reconcile.
+* **Server (Spring Boot)**: WebSocket gateway, REST API, MatchManager, AI engine.
+* **Database (PostgreSQL)**
+* **Observability**: Actuator → Prometheus → Grafana.
+
+== Thành phần chính
+* **Frontend**
+** SceneManager, Renderer, InputHandler, NetClient.
+* **Backend**
+** Auth.
+** CollisionService, ExplosionService, AiEngine.
+** Repository.
+* **Database**
+** users, rooms, matches, leaderboard.
+
+== Mô hình dữ liệu (Data Model)
+
+=== TileMap
+* Dạng lưới 2D cố định (ví dụ 13x11), gồm các TileType:
+** `EMPTY` — ô trống có thể đi.
+** `SOFT_WALL` — tường mềm, bị phá bởi nổ.
+** `HARD_WALL` — tường cứng, không phá, chặn nổ.
+** `POWER_UP` — ô có vật phẩm.
+** `SPAWN_POINT` — vị trí sinh người chơi.
+* Sinh map (procedural rules rút gọn):
+** Viền ngoài toàn `HARD_WALL`; pattern `HARD_WALL` xen kẽ theo ô bàn cờ để tạo cấu trúc. :contentReference[oaicite:0]{index=0}
+** Rải `SOFT_WALL` ngẫu nhiên với tỉ lệ cấu hình và seed để tái lập; đảm bảo lối đi giữa các `SPAWN_POINT`. :contentReference[oaicite:1]{index=1}
+** `POWER_UP` rơi ra khi phá `SOFT_WALL` theo xác suất (drop rate). :contentReference[oaicite:2]{index=2}
+
+=== Actor (chung cho Player & Machine)
+* Khái niệm: thực thể có thể điều khiển được trong trận (human hoặc bot).
+* Thuộc tính cốt lõi:
+** `id: UUID` — định danh.
+** `name: String`
+** `type: HUMAN|BOT`
+** `x, y: int` — toạ độ tile; tùy chọn `offsetX, offsetY` cho render mượt.
+** `dir: enum{UP,DOWN,LEFT,RIGHT,IDLE}`
+** `speed: int` — tốc độ di chuyển theo tick.
+** `bombsMax: int` — số bom tối đa đặt đồng thời (ảnh hưởng bởi Bomb Up). :contentReference[oaicite:3]{index=3}
+** `bombsActive: int` — số bom đang hiện diện thuộc Actor.
+** `bombPower: int` — bán kính nổ (Fire Up). :contentReference[oaicite:4]{index=4}
+** `alive: boolean`
+** `score: int`
+* Khả năng mở rộng bởi power-up (bật/tắt theo game mode):
+** `canKick: boolean` — đá bom lăn trên hàng/cột. :contentReference[oaicite:5]{index=5}
+** `canThrow: boolean` — nhấc và ném bom. :contentReference[oaicite:6]{index=6}
+** `canPassBomb: boolean` — đi xuyên qua bom (Bomb Pass). :contentReference[oaicite:7]{index=7}
+** `canPassSoftWall: boolean` — đi xuyên tường mềm (Wall Pass). :contentReference[oaicite:8]{index=8}
+** `hasRemote: boolean` — kích nổ từ xa (Remote Control). :contentReference[oaicite:9]{index=9}
+** `shields: int` — số lần chặn nổ nếu có khiên. :contentReference[oaicite:10]{index=10}
+
+=== Player (HUMAN)
+* Nguồn input từ client; server chỉ nhận INTENT (MOVE/PLACE_BOMB).
+* Thừa kế toàn bộ thuộc tính từ `Actor`.
+
+=== Machine (BOT)
+* `difficulty: EASY|NORMAL|HARD`
+* `MachineStrategy` (Strategy) quyết định MOVE/ACTION:
+
+=== Bomb
+* Thuộc tính:
+** `id: UUID`, `ownerId: UUID`
+** `x, y: int` — tile đặt bom
+** `placedAtMs: long`, `fuseMs: int` — kíp nổ (ví dụ 1800–2500 ms)
+** `power: int` — bán kính nổ theo 4 hướng
+* Tương tác:
+** Bị đá/đẩy/néo nếu `canKick/canThrow`.
+** Bị kích hoạt dây chuyền khi trúng tia nổ của bom khác (chain reaction).
+
+=== Explosion
+* Thuộc tính:
+** `centerX, centerY: int`
+** `radius: int` — tính theo `power` của bom
+** `createdAtMs: long`, `durationMs: int`
+** `segments: List<Tile>` — các ô chịu ảnh hưởng (4 tia nổ).
+* Quy tắc:
+** Tia nổ dừng tại `HARD_WALL`; phá `SOFT_WALL` rồi dừng ở ô đó.
+=== PowerUp
+* Thuộc tính:
+** `type: enum
+** `x, y: int`
+* Nguồn rơi: khi phá `SOFT_WALL` hoặc tiêu diệt địch (tùy mode).
+* Ảnh hưởng thuộc tính đến `Actor` như đã liệt kê ở trên.
+
+=== Room / Match
+* `id: UUID`, `status: enum{LOBBY, COUNTDOWN, RUNNING, FINISHED}`
+* `players: List<Actor>` — gồm HUMAN và BOT
+* `config`:
+** `tickRate`, `bomb.fuseMs`, `bomb.basePower`, `powerup.dropRates.*`
+** `mapSeed`, `mapSize`, `suddenDeathAtSec`…
+* Nhật ký (tuỳ chọn):
+** `events[]` (để replay/anti-cheat nhẹ)
+
+== Game Loop & Tick logic
+* Tick server 20–30 Hz.
+* Nhận input → cập nhật vị trí → xử lý bom → lan nổ → update state → gửi snapshot.
+* Client: prediction + reconcile theo snapshot.
+
+== Khả năng mở rộng
+* Một tiến trình: mỗi room một MatchLoop (thread pool).
+* Nhiều tiến trình: shard room, sticky sessions.
+* REST stateless, WebSocket state tối thiểu.
+
+== Monitoring & Metrics
+* Metrics: tick_duration, rooms_active, players_active, ws_connected.
+* Logs: JSON, kèm roomId, matchId, tick.
+* Grafana: latency, CPU, số phòng, disconnect rate.
+
+== Kiểm thử
+* Unit: explosion, collision, pathfinding.
+* Integration: input → snapshot consistency.
+* Load test: 50–100 phòng.
+* Playtest checklist.
+
+== Lộ trình phát triển
+1. Khung networking + render.
+2. Gameplay local.
+3. Server authoritative + snapshot.
+4. Lobby + leaderboard + DB.
+5. Machine Easy/Normal/Hard.
+6. Monitoring Prometheus/Grafana.
+7. Polish UI/UX, assets.

@@ -1,12 +1,11 @@
 = Boom Blast – Multiplayer Bomberman Clone
-:toc:
-:toclevels: 3
+
 :sectnums:
 :icons: font
 :source-highlighter: coderay
 
 == Giới thiệu
-Boom Blast là trò chơi lấy cảm hứng từ *Bomberman*, được phát triển theo kiến trúc full-stack web.
+Boom Blast là trò chơi lấy cảm hứng từ *Bomberman*, được phát triển theo kiến trúc web.
 Mục tiêu:
 * Xây dựng gameplay đặt bom – phá tường – ăn item cơ bản
 * Hỗ trợ nhiều người chơi online
@@ -16,20 +15,17 @@ Mục tiêu:
 == Kiến trúc hệ thống
 Hệ thống chia thành 2 phần chính: **frontend** (game client) và **backend** (game server).
 
-image::images/architecture.png[alt="System Architecture",width=800,align=center]
+image::docs/images/architecture.png[alt="System Architecture",width=800,align=center]
 
 == Công nghệ sử dụng
-* **Frontend**: Phaser 3, Vite, TypeScript
+* **Frontend**: (late updated)
 * **Backend**: Java 21+, Spring Boot, Maven, MyBatis, WebSocket
 * **Database**: PostgreSQL 17+
 * **Monitoring**: Prometheus, Grafana
-* **Deploy**: Docker (tùy chọn)
 
 == Yêu cầu hệ thống
 * JDK 21+
-* Node.js 18+
 * PostgreSQL 17+
-* Docker (nếu muốn chạy monitoring stack)
 
 == Cấu trúc thư mục
 [source]
@@ -60,15 +56,10 @@ boom-blast/
 * Tick loop (20–30 Hz): bom, nổ, va chạm
 * Authoritative server: ngăn cheat, đồng bộ state
 * REST API:
-- `POST /api/login`
-- `GET /api/rooms`
-- `POST /api/rooms`
-- `GET /api/leaderboard`
+
 
 === Database (PostgreSQL + MyBatis)
-* `users(id, username, password_hash, created_at)`
-* `matches(id, room_id, started_at, ended_at)`
-* `leaderboard(user_id, score)`
+
 
 === Monitoring
 * Spring Boot Actuator + Micrometer export metrics
@@ -76,7 +67,7 @@ boom-blast/
 * Grafana dashboard: latency, FPS, số phòng, số người chơi
 
 == Machine
-Machine được thiết kế với Strategy pattern, mỗi cấp độ triển khai một controller riêng.
+Machine được thiết kế với Strategy pattern, mỗi cấp độ triển khai một Machine riêng.
 
 === EASY
 * Chọn ngẫu nhiên hướng di chuyển an toàn
@@ -96,15 +87,14 @@ Machine được thiết kế với Strategy pattern, mỗi cấp độ triển 
 * Nhược: tốn CPU hơn
 
 === Logic chung
-* Machine chỉ gửi INPUT (MOVE/PLACE_BOMB) → Server quyết định kết quả
-* Đặt bom khi:
-** Có khả năng nhốt đối thủ
-** Có đường chạy thoát trước khi nổ
-* Né bom bằng BFS hoặc A* tới ô an toàn gần nhất
+* Mục tiêu là chiến thắng người chơi
+* Machine sẽ luôn chạy tới người chơi để thả boom
+* Thả bom nếu tồn tại đường chạy ra ngoài
+* Tìm đường đi ngắn nhất tới ô an toàn
 
 == Design Patterns & OOP
 === Strategy
-* `MachineController` interface
+* `Machine` interface
 * Các triển khai: `EasyMachine`, `NormalMachine`, `HardMachine`
 
 === State
@@ -127,7 +117,7 @@ Machine được thiết kế với Strategy pattern, mỗi cấp độ triển 
 
 == Luồng dữ liệu
 
-image::images/sequence.png[alt="Sequence Diagram",width=600,align=center]
+image::docs/images/sequence.png[alt="Sequence Diagram",width=600,align=center]
 
 == Roadmap phát triển
 * Sprint 1: Game loop cơ bản (map, player, bomb, explosion)
