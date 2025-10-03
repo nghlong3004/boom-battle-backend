@@ -252,10 +252,11 @@ POST /api/v{revnumber}/auth/logout
 |===
 
 .Request
-[source,http,subs="attributes"]
+[source,bash,subs="attributes"]
 ----
-POST /api/v{revnumber}/auth/logout
-Authorization: Bearer <token>
+curl -X POST {api-url}/api/v{revnumber}/auth/logout \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json"
 ----
 
 .Response
@@ -267,12 +268,12 @@ Authorization: Bearer <token>
 ----
 
 .Response Codes
-[options="header",cols="1,2,3"]
+[options="header",cols="1,2"]
 |===
-|HTTP Code |Code |Message
-|204 No Content |SUCCESS |Logout successful
-|401 Unauthorized |INVALID_TOKEN |Token missing or invalid
-|500 Internal Server Error |SERVER_ERROR |Unexpected error occurred
+|HTTP Code |Message
+|204 No Content |Logout successful
+|401 Unauthorized |Token missing or invalid
+|500 Internal Server Error |Unexpected error occurred
 |===
 
 .Error Payload Example

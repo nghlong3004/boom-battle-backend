@@ -169,7 +169,26 @@ curl -X GET {api-url}/api/v{revnumber}/statistics/matches/201 \
   "endedAt": "2025-10-01T14:25:00Z",
   "durationSec": 900,
   "winnerId": 123,
-  "playerStats": []
+  "playerStats": [
+    {
+      "playerId": 101,
+      "username": "new_player",
+      "kills": 5,
+      "deaths": 2,
+      "bombsPlaced": 30,
+      "powerupsCollected": 10,
+      "score": 1500
+    },
+    {
+      "playerId": 123,
+      "username": "champion",
+      "kills": 8,
+      "deaths": 1,
+      "bombsPlaced": 40,
+      "powerupsCollected": 15,
+      "score": 2000
+    }
+  ]
 }
 ----
 
