@@ -1,4 +1,4 @@
-=== Default response codes
+== Default response codes
 
 Here are the meanings of the most commonly used HTTP response codes:
 

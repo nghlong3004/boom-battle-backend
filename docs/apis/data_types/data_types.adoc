@@ -74,7 +74,7 @@ Represents a game match.
 
 Represents a playable map.
 
-[source=json]
+[source, json]
 ----
 {
   "id": 10,
