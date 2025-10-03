@@ -1,0 +1,25 @@
+The **Boom Battle API** provides access to the backend services of the Boom Battle game.
+It is designed to allow clients (such as the React frontend or third-party tools) to
+communicate with the game server in a secure and structured way.
+
+A *player* represents a human user who participates in a match.
+Each player has a unique identifier, a display name, and statistics such as
+the number of wins, losses, and total games played.
+
+A *match* is a real-time battle between multiple players on a game map.
+The map is composed of destructible and indestructible blocks, power-ups, and bombs.
+Players place bombs, collect power-ups, and try to eliminate opponents until
+one player (or team) remains as the winner.
+
+The API exposes endpoints for:
+
+- **Authentication**: Registering and logging in players securely.
+- **Player Management**: Fetching player details, updating profiles, and viewing leaderboards.
+- **Matchmaking**: Creating, joining, and managing game sessions.
+- **Gameplay**: Sending player actions (e.g., place bomb, move, collect power-up)
+and receiving game state updates in real-time (via WebSocket).
+- **Statistics**: Retrieving match history, player rankings, and performance metrics.
+
+The Boom Battle API follows REST principles for request/response endpoints
+and WebSocket for real-time gameplay updates.
+All responses are encoded in JSON and require proper authentication tokens.

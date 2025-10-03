@@ -1,0 +1,39 @@
+= API document for Boom Battle
+Long Nguyen <nghlong3004@gmail.com>
+v1
+:toc:
+:sectanchors:
+:sectnums:
+:api-url: https://api.boombattle.com
+
+== Introduction
+
+include::introduction/introduction.adoc[]
+
+== Standards
+
+include::standards/http.adoc[]
+
+include::standards/default_response_codes.adoc[]
+
+== Group Endpoints
+
+include::group_endpoints/authentications.adoc[]
+
+include::group_endpoints/players.adoc[]
+
+include::group_endpoints/matches.adoc[]
+
+include::group_endpoints/gameplay.adoc[]
+
+include::group_endpoints/maps.adoc[]
+
+include::group_endpoints/power-up.adoc[]
+
+include::group_endpoints/statistics.adoc[]
+
+include::group_endpoints/admin.adoc[]
+
+== Data types
+
+include::data_types/data_types.adoc[]
