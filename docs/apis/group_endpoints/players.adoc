@@ -63,7 +63,7 @@ GET /api/v{revnumber}/players
 |===
 
 .Error Payload Example
-[source=json]
+[source, json]
 ----
 {
   "code": "UNAUTHORIZED",
@@ -79,7 +79,7 @@ curl -X GET "{api-url}/api/v{revnumber}/players?page=0&size=20&sort=wins,desc" \
 ----
 
 .Sample Response
-[source=json]
+[source, json]
 ----
 {
   "content": [],
@@ -133,7 +133,7 @@ GET /api/v{revnumber}/players/me
 |===
 
 .Error Payload Example
-[source=json]
+[source, json]
 ----
 {
   "code": "UNAUTHORIZED",
@@ -149,7 +149,7 @@ curl -X GET {api-url}/api/v{revnumber}/players/me \
 ----
 
 .Sample Response
-[source=json]
+[source, json]
 ----
 {
   "id": 101,
@@ -205,7 +205,7 @@ GET /api/v{revnumber}/players/{id}
 |===
 
 .Error Payload Example
-[source=json]
+[source, json]
 ----
 {
   "code": "PLAYER_NOT_FOUND",
@@ -221,7 +221,7 @@ curl -X GET {api-url}/api/v{revnumber}/players/123 \
 ----
 
 .Sample Response
-[source=json]
+[source, json]
 ----
 {
   "id": 123,
@@ -254,7 +254,7 @@ PUT /api/v{revnumber}/players/{id}
 |===
 
 .Request
-[source=json]
+[source, json]
 ----
 {
   "username": "pro_battler",
@@ -264,7 +264,7 @@ PUT /api/v{revnumber}/players/{id}
 ----
 
 .Response
-[source=json]
+[source, json]
 ----
 {
   "id": 123,
@@ -289,7 +289,7 @@ PUT /api/v{revnumber}/players/{id}
 |===
 
 .Error Payload Example
-[source=json]
+[source, json]
 ----
 {
   "code": "FORBIDDEN",
@@ -311,7 +311,7 @@ curl -X PUT {api-url}/api/v{revnumber}/players/123 \
 ----
 
 .Sample Response
-[source=json]
+[source, json]
 ----
 {
   "id": 123,
@@ -344,7 +344,7 @@ DELETE /api/v{revnumber}/players/{id}
 |===
 
 .Response
-[source=json]
+[source, json]
 ----
 {
   "message": "Player deleted successfully"
@@ -362,7 +362,7 @@ DELETE /api/v{revnumber}/players/{id}
 |===
 
 .Error Payload Example
-[source=json]
+[source, json]
 ----
 {
   "code": "FORBIDDEN",
@@ -378,7 +378,7 @@ curl -X DELETE {api-url}/api/v{revnumber}/players/123 \
 ----
 
 .Sample Response
-[source=json]
+[source, json]
 ----
 {
   "message": "Player deleted successfully"
@@ -414,7 +414,7 @@ GET /api/v{revnumber}/players/leaderboard
 |===
 
 .Response
-[source=json]
+[source, json]
 ----
 {
   "players": [
@@ -434,7 +434,7 @@ GET /api/v{revnumber}/players/leaderboard
 |===
 
 .Error Payload Example
-[source=json]
+[source, json]
 ----
 {
   "code": "INVALID_PARAM",
@@ -449,7 +449,7 @@ curl -X GET "{api-url}/api/v{revnumber}/players/leaderboard?limit=10&offset=0"
 ----
 
 .Sample Response
-[source=json]
+[source, json]
 ----
 {
   "players": [],

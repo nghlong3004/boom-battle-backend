@@ -167,7 +167,7 @@ curl -X POST {api-url}/api/v{revnumber}/matches \
 ----
 
 .Sample Response
-[source=json]
+[source, json]
 ----
 {
   "id": 201,
@@ -240,7 +240,7 @@ curl -X GET {api-url}/api/v{revnumber}/matches/201 \
 ----
 
 .Sample Response
-[source=json]
+[source, json]
 ----
 {
   "id": 201,
@@ -306,7 +306,7 @@ curl -X POST {api-url}/api/v{revnumber}/matches/201/join \
 ----
 
 .Sample Response
-[source=json]
+[source, json]
 ----
 {
   "message": "Joined match successfully"
@@ -350,7 +350,7 @@ POST /api/v{revnumber}/matches/{id}/leave
 |===
 
 .Error Payload Example
-[source=json]
+[source, json]
 ----
 {
   "code": "MATCH_NOT_FOUND",
@@ -366,7 +366,7 @@ curl -X POST {api-url}/api/v{revnumber}/matches/201/leave \
 ----
 
 .Sample Response
-[source=json]
+[source, json]
 ----
 {
   "message": "Left match successfully"
@@ -411,7 +411,7 @@ DELETE /api/v{revnumber}/matches/{id}
 |===
 
 .Error Payload Example
-[source=json]
+[source, json]
 ----
 {
   "code": "FORBIDDEN",
@@ -427,7 +427,7 @@ curl -X DELETE {api-url}/api/v{revnumber}/matches/201 \
 ----
 
 .Sample Response
-[source=json]
+[source, json]
 ----
 {
   "message": "Match cancelled successfully"

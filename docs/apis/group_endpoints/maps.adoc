@@ -69,7 +69,7 @@ GET /api/v{revnumber}/maps
 |===
 
 .Error Payload Example
-[source=json]
+[source, json]
 ----
 {
   "code": "UNAUTHORIZED",
@@ -85,7 +85,7 @@ curl -X GET "{api-url}/api/v{revnumber}/maps?page=0&size=20&sort=name,asc" \
 ----
 
 .Sample Response
-[source=json]
+[source, json]
 ----
 {
   "content": [],
@@ -148,7 +148,7 @@ GET /api/v{revnumber}/maps/{id}
 |===
 
 .Error Payload Example
-[source=json]
+[source, json]
 ----
 {
   "code": "MAP_NOT_FOUND",
@@ -164,7 +164,7 @@ curl -X GET {api-url}/api/v{revnumber}/maps/10 \
 ----
 
 .Sample Response
-[source=json]
+[source, json]
 ----
 {
   "id": 10,

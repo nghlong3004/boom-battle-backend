@@ -86,7 +86,7 @@ curl -X GET "{api-url}/api/v{revnumber}/admin/players?page=0&size=20" \
 ----
 
 .Sample Response
-[source=json]
+[source, json]
 ----
 {
   "content": [],
@@ -157,7 +157,7 @@ GET /api/v{revnumber}/admin/matches
 |===
 
 .Error Payload Example
-[source=json]
+[source, json]
 ----
 {
   "code": "FORBIDDEN",
@@ -173,7 +173,7 @@ curl -X GET "{api-url}/api/v{revnumber}/admin/matches?status=FINISHED" \
 ----
 
 .Sample Response
-[source=json]
+[source, json]
 ----
 {
   "content": [],
@@ -222,7 +222,7 @@ DELETE /api/v{revnumber}/admin/players/{id}
 |===
 
 .Error Payload Example
-[source=json]
+[source, json]
 ----
 {
   "code": "PLAYER_NOT_FOUND",
@@ -238,7 +238,7 @@ curl -X DELETE {api-url}/api/v{revnumber}/admin/players/123 \
 ----
 
 .Sample Response
-[source=json]
+[source, json]
 ----
 {
   "message": "Player deleted by admin"
@@ -291,7 +291,7 @@ GET /api/v{revnumber}/admin/statistics
 |===
 
 .Error Payload Example
-[source=json]
+[source, json]
 ----
 {
   "code": "FORBIDDEN",
@@ -307,7 +307,7 @@ curl -X GET {api-url}/api/v{revnumber}/admin/statistics \
 ----
 
 .Sample Response
-[source=json]
+[source, json]
 ----
 {
   "totalPlayers": 540,

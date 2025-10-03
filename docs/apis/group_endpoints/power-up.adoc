@@ -25,7 +25,7 @@ GET /api/v{revnumber}/powerups
 |===
 
 .Response
-[source=json]
+[source, json]
 ----
 [
   {
@@ -54,7 +54,7 @@ GET /api/v{revnumber}/powerups
 |===
 
 .Error Payload Example
-[source=json]
+[source, json]
 ----
 {
   "code": "UNAUTHORIZED",
@@ -70,7 +70,7 @@ curl -X GET {api-url}/api/v{revnumber}/powerups \
 ----
 
 .Sample Response
-[source=json]
+[source, json]
 ----
 [
   {
@@ -104,7 +104,7 @@ GET /api/v{revnumber}/powerups/{id}
 |===
 
 .Response
-[source=json]
+[source, json]
 ----
 {
   "id": "SPEED_UP",
@@ -125,7 +125,7 @@ GET /api/v{revnumber}/powerups/{id}
 |===
 
 .Error Payload Example
-[source=json]
+[source, json]
 ----
 {
   "code": "POWERUP_NOT_FOUND",
@@ -141,7 +141,7 @@ curl -X GET {api-url}/api/v{revnumber}/powerups/SPEED_UP \
 ----
 
 .Sample Response
-[source=json]
+[source, json]
 ----
 {
   "id": "SPEED_UP",

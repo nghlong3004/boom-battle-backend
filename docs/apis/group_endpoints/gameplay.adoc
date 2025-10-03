@@ -54,7 +54,7 @@ POST /api/v{revnumber}/actions/place-bomb
 |===
 
 .Error Payload Example
-[source=json]
+[source, json]
 ----
 {
   "code": "ACTION_NOT_ALLOWED",
@@ -75,7 +75,7 @@ curl -X POST {api-url}/api/v{revnumber}/actions/place-bomb \
 ----
 
 .Sample Response
-[source=json]
+[source, json]
 ----
 {
   "message": "Bomb placed"
@@ -103,7 +103,7 @@ POST /api/v{revnumber}/actions/move
 |===
 
 .Request
-[source=json]
+[source, json]
 ----
 {
   "matchId": 201,
@@ -113,7 +113,7 @@ POST /api/v{revnumber}/actions/move
 ----
 
 .Response
-[source=json]
+[source, json]
 ----
 {
   "message": "Move accepted"
@@ -132,7 +132,7 @@ POST /api/v{revnumber}/actions/move
 |===
 
 .Error Payload Example
-[source=json]
+[source, json]
 ----
 {
   "code": "MOVE_BLOCKED",
@@ -154,7 +154,7 @@ curl -X POST {api-url}/api/v{revnumber}/actions/move \
 ----
 
 .Sample Response
-[source=json]
+[source, json]
 ----
 {
   "message": "Move accepted"
@@ -182,7 +182,7 @@ POST /api/v{revnumber}/actions/collect-powerup
 |===
 
 .Request
-[source=json]
+[source, json]
 ----
 {
   "matchId": 201
@@ -190,7 +190,7 @@ POST /api/v{revnumber}/actions/collect-powerup
 ----
 
 .Response
-[source=json]
+[source, json]
 ----
 {
   "message": "Power-up collected"
@@ -208,7 +208,7 @@ POST /api/v{revnumber}/actions/collect-powerup
 |===
 
 .Error Payload Example
-[source=json]
+[source, json]
 ----
 {
   "code": "NO_POWERUP",
@@ -226,7 +226,7 @@ curl -X POST {api-url}/api/v{revnumber}/actions/collect-powerup \
 ----
 
 .Sample Response
-[source=json]
+[source, json]
 ----
 {
   "message": "Power-up collected"
@@ -292,7 +292,7 @@ socket.onmessage = (e) => console.log(JSON.parse(e.data));
 |===
 
 .Error Payload Example
-[source=json]
+[source, json]
 ----
 {
   "code": "UNAUTHORIZED",
