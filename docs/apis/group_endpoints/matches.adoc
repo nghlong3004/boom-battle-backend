@@ -1,0 +1,435 @@
+=== Matches API
+
+The *Matches* resource represents game sessions in Boom Battle.
+It provides endpoints to create matches, join or leave them,
+fetch details, list available matches with pagination, and cancel matches.
+
+'''
+
+==== List Matches
+
+*Matches API v{revnumber}* – Retrieve a paginated list of open matches.
+
+.Endpoint
+[source,http,subs="attributes"]
+----
+GET /api/v{revnumber}/matches
+----
+
+.Header Parameters
+[options="header",cols="2,1,4,3"]
+|===
+|Name |Required |Description |Example
+|Authorization |Yes |Bearer token used for authentication |Bearer eyJhbGciOiJIUzI1...
+|Accept |No |Preferred response media type |application/json
+|===
+
+.Query Parameters
+[options="header",cols="1,1,3,3"]
+|===
+|Name |Required |Description |Example
+|page |No |Zero-based page index (default: 0) |page=0
+|size |No |Page size (default: 20, max: 100) |size=20
+|sort |No |Sort criteria, `<field>,<asc or desc>` |sort=createdAt,desc
+|status |No |Filter matches by status (`OPEN`, `IN_PROGRESS`, `FINISHED`) |status=OPEN
+|===
+
+.Response
+[source,json]
+----
+{
+  "content": [
+    {
+      "id": 201,
+      "name": "Battle Room 1",
+      "status": "OPEN",
+      "mapId": 10,
+      "players": 3,
+      "maxPlayers": 4,
+      "createdAt": "2025-10-03T15:20:00Z"
+    }
+  ],
+  "page": 0,
+  "size": 20,
+  "totalElements": 1,
+  "totalPages": 1
+}
+----
+
+.Response Codes
+[options="header",cols="1,2"]
+|===
+|HTTP Code |Message
+|200 OK |Matches fetched successfully
+|401 Unauthorized |Authentication required
+|===
+
+.Error Payload Example
+[source,json]
+----
+{
+  "code": "UNAUTHORIZED",
+  "message": "Missing or invalid token."
+}
+----
+
+.cURL Example
+[source,bash,subs="attributes"]
+----
+curl -X GET "{api-url}/api/v{revnumber}/matches?page=0&size=20&status=OPEN" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1..."
+----
+
+.Sample Response
+[source,json]
+----
+{
+  "content": [],
+  "page": 0,
+  "size": 20,
+  "totalElements": 0,
+  "totalPages": 0
+}
+----
+
+'''
+
+==== Create Match
+
+*Matches API v{revnumber}* – Create a new match.
+
+.Endpoint
+[source,http,subs="attributes"]
+----
+POST /api/v{revnumber}/matches
+----
+
+.Header Parameters
+[options="header",cols="2,1,4,3"]
+|===
+|Name |Required |Description |Example
+|Authorization |Yes |Bearer token used for authentication |Bearer eyJhbGciOiJIUzI1...
+|Content-Type |Yes |Defines the media type of the request body |application/json
+|===
+
+.Request
+[source,json]
+----
+{
+  "name": "Battle Room 1",
+  "mapId": 10,
+  "maxPlayers": 4
+}
+----
+
+.Response
+[source,json]
+----
+{
+  "id": 201,
+  "name": "Battle Room 1",
+  "status": "OPEN",
+  "mapId": 10,
+  "maxPlayers": 4,
+  "createdAt": "2025-10-03T15:20:00Z"
+}
+----
+
+.Response Codes
+[options="header",cols="1,2"]
+|===
+|HTTP Code |Message
+|201 Created |Match created successfully
+|400 Bad Request |Invalid input
+|401 Unauthorized |Authentication required
+|===
+
+.Error Payload Example
+[source,json]
+----
+{
+  "code": "INVALID_INPUT",
+  "message": "maxPlayers must be greater than 1."
+}
+----
+
+.cURL Example
+[source,bash,subs="attributes"]
+----
+curl -X POST {api-url}/api/v{revnumber}/matches \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1..." \
+  -H "Content-Type: application/json" \
+  -d '{
+        "name": "Battle Room 1",
+        "mapId": 10,
+        "maxPlayers": 4
+      }'
+----
+
+.Sample Response
+[source, json]
+----
+{
+  "id": 201,
+  "name": "Battle Room 1",
+  "status": "OPEN",
+  "mapId": 10,
+  "maxPlayers": 4,
+  "createdAt": "2025-10-03T15:20:00Z"
+}
+----
+
+'''
+
+==== Get Match by ID
+
+*Matches API v{revnumber}* – Retrieve details of a specific match.
+
+.Endpoint
+[source,http,subs="attributes"]
+----
+GET /api/v{revnumber}/matches/{id}
+----
+
+.Header Parameters
+[options="header",cols="2,1,4,3"]
+|===
+|Name |Required |Description |Example
+|Authorization |Yes |Bearer token used for authentication |Bearer eyJhbGciOiJIUzI1...
+|===
+
+.Response
+[source,json]
+----
+{
+  "id": 201,
+  "name": "Battle Room 1",
+  "status": "OPEN",
+  "mapId": 10,
+  "maxPlayers": 4,
+  "players": [
+    { "id": 1, "username": "player1" },
+    { "id": 2, "username": "player2" }
+  ]
+}
+----
+
+.Response Codes
+[options="header",cols="1,2"]
+|===
+|HTTP Code |Message
+|200 OK |Match fetched successfully
+|401 Unauthorized |Authentication required
+|404 Not Found |Match not found
+|===
+
+.Error Payload Example
+[source,json]
+----
+{
+  "code": "MATCH_NOT_FOUND",
+  "message": "The match with ID 999 does not exist."
+}
+----
+
+.cURL Example
+[source,bash,subs="attributes"]
+----
+curl -X GET {api-url}/api/v{revnumber}/matches/201 \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1..."
+----
+
+.Sample Response
+[source, json]
+----
+{
+  "id": 201,
+  "name": "Battle Room 1",
+  "status": "OPEN",
+  "mapId": 10,
+  "maxPlayers": 4,
+  "players": []
+}
+----
+
+'''
+
+==== Join Match
+
+*Matches API v{revnumber}* – Join an existing match.
+
+.Endpoint
+[source,http,subs="attributes"]
+----
+POST /api/v{revnumber}/matches/{id}/join
+----
+
+.Header Parameters
+[options="header",cols="2,1,4,3"]
+|===
+|Name |Required |Description |Example
+|Authorization |Yes |Bearer token used for authentication |Bearer eyJhbGciOiJIUzI1...
+|===
+
+.Response
+[source,json]
+----
+{
+  "message": "Joined match successfully"
+}
+----
+
+.Response Codes
+[options="header",cols="1,2"]
+|===
+|HTTP Code |Message
+|200 OK |Joined successfully
+|401 Unauthorized |Authentication required
+|403 Forbidden |Match is full or already started
+|404 Not Found |Match not found
+|===
+
+.Error Payload Example
+[source,json]
+----
+{
+  "code": "MATCH_FULL",
+  "message": "The match is already full."
+}
+----
+
+.cURL Example
+[source,bash,subs="attributes"]
+----
+curl -X POST {api-url}/api/v{revnumber}/matches/201/join \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1..."
+----
+
+.Sample Response
+[source, json]
+----
+{
+  "message": "Joined match successfully"
+}
+----
+
+'''
+
+==== Leave Match
+
+*Matches API v{revnumber}* – Leave a match you previously joined.
+
+.Endpoint
+[source,http,subs="attributes"]
+----
+POST /api/v{revnumber}/matches/{id}/leave
+----
+
+.Header Parameters
+[options="header",cols="2,1,4,3"]
+|===
+|Name |Required |Description |Example
+|Authorization |Yes |Bearer token used for authentication |Bearer eyJhbGciOiJIUzI1...
+|===
+
+.Response
+[source,json]
+----
+{
+  "message": "Left match successfully"
+}
+----
+
+.Response Codes
+[options="header",cols="1,2"]
+|===
+|HTTP Code |Message
+|200 OK |Left successfully
+|401 Unauthorized |Authentication required
+|404 Not Found |Match not found
+|===
+
+.Error Payload Example
+[source, json]
+----
+{
+  "code": "MATCH_NOT_FOUND",
+  "message": "The match with ID 999 does not exist."
+}
+----
+
+.cURL Example
+[source,bash,subs="attributes"]
+----
+curl -X POST {api-url}/api/v{revnumber}/matches/201/leave \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1..."
+----
+
+.Sample Response
+[source, json]
+----
+{
+  "message": "Left match successfully"
+}
+----
+
+'''
+
+==== Cancel Match
+
+*Matches API v{revnumber}* – Cancel an existing match (only host or admin allowed).
+
+.Endpoint
+[source,http,subs="attributes"]
+----
+DELETE /api/v{revnumber}/matches/{id}
+----
+
+.Header Parameters
+[options="header",cols="2,1,4,3"]
+|===
+|Name |Required |Description |Example
+|Authorization |Yes |Bearer token used for authentication |Bearer eyJhbGciOiJIUzI1...
+|===
+
+.Response
+[source,json]
+----
+{
+  "message": "Match cancelled successfully"
+}
+----
+
+.Response Codes
+[options="header",cols="1,2"]
+|===
+|HTTP Code |Message
+|204 No Content |Match cancelled successfully
+|401 Unauthorized |Authentication required
+|403 Forbidden |Not allowed to cancel this match
+|404 Not Found |Match not found
+|===
+
+.Error Payload Example
+[source, json]
+----
+{
+  "code": "FORBIDDEN",
+  "message": "You are not allowed to cancel this match."
+}
+----
+
+.cURL Example
+[source,bash,subs="attributes"]
+----
+curl -X DELETE {api-url}/api/v{revnumber}/matches/201 \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1..."
+----
+
+.Sample Response
+[source, json]
+----
+{
+  "message": "Match cancelled successfully"
+}
+----

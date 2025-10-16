@@ -1,0 +1,153 @@
+=== Power-ups API
+
+The *Power-ups* resource exposes read-only metadata about all power-ups available
+in Boom Battle. Clients can list all supported power-ups and fetch details of a specific one.
+Power-ups cannot be created, updated, or deleted via API.
+
+'''
+
+==== List Power-ups
+
+*Power-ups API v{revnumber}* – Retrieve a list of available power-ups.
+
+.Endpoint
+[source,http,subs="attributes"]
+----
+GET /api/v{revnumber}/powerups
+----
+
+.Header Parameters
+[options="header",cols="2,1,4,3"]
+|===
+|Name |Required |Description |Example
+|Authorization |No |Bearer token (optional if public) |Bearer eyJhbGciOiJIUzI1...
+|Accept |No |Preferred response media type |application/json
+|===
+
+.Response
+[source, json]
+----
+[
+  {
+    "id": "BOMB_UP",
+    "name": "Extra Bomb",
+    "description": "Allows the player to place one more bomb at the same time.",
+    "iconUrl": "https://cdn.example.com/powerups/bomb_up.png",
+    "maxStack": 5
+  },
+  {
+    "id": "FIRE_UP",
+    "name": "Flame Power",
+    "description": "Increases bomb explosion radius by 1 tile.",
+    "iconUrl": "https://cdn.example.com/powerups/fire_up.png",
+    "maxStack": 10
+  }
+]
+----
+
+.Response Codes
+[options="header",cols="1,2"]
+|===
+|HTTP Code |Message
+|200 OK |Power-ups fetched successfully
+|401 Unauthorized |Authentication required (if not public)
+|===
+
+.Error Payload Example
+[source, json]
+----
+{
+  "code": "UNAUTHORIZED",
+  "message": "Missing or invalid token."
+}
+----
+
+.cURL Example
+[source,bash,subs="attributes"]
+----
+curl -X GET {api-url}/api/v{revnumber}/powerups \
+  -H "Accept: application/json"
+----
+
+.Sample Response
+[source, json]
+----
+[
+  {
+    "id": "BOMB_UP",
+    "name": "Extra Bomb",
+    "description": "Allows the player to place one more bomb at the same time.",
+    "iconUrl": "https://cdn.example.com/powerups/bomb_up.png",
+    "maxStack": 5
+  }
+]
+----
+
+'''
+
+==== Get Power-up by ID
+
+*Power-ups API v{revnumber}* – Retrieve details for a specific power-up.
+
+.Endpoint
+[source,http,subs="attributes"]
+----
+GET /api/v{revnumber}/powerups/{id}
+----
+
+.Header Parameters
+[options="header",cols="2,1,4,3"]
+|===
+|Name |Required |Description |Example
+|Authorization |No |Bearer token (optional if public) |Bearer eyJhbGciOiJIUzI1...
+|Accept |No |Preferred response media type |application/json
+|===
+
+.Response
+[source, json]
+----
+{
+  "id": "SPEED_UP",
+  "name": "Speed Boost",
+  "description": "Increases player movement speed by 10%.",
+  "iconUrl": "https://cdn.example.com/powerups/speed_up.png",
+  "maxStack": 3
+}
+----
+
+.Response Codes
+[options="header",cols="1,2"]
+|===
+|HTTP Code |Message
+|200 OK |Power-up fetched successfully
+|401 Unauthorized |Authentication required (if not public)
+|404 Not Found |Power-up not found
+|===
+
+.Error Payload Example
+[source, json]
+----
+{
+  "code": "POWERUP_NOT_FOUND",
+  "message": "The specified power-up does not exist."
+}
+----
+
+.cURL Example
+[source,bash,subs="attributes"]
+----
+curl -X GET {api-url}/api/v{revnumber}/powerups/SPEED_UP \
+  -H "Accept: application/json"
+----
+
+.Sample Response
+[source, json]
+----
+{
+  "id": "SPEED_UP",
+  "name": "Speed Boost",
+  "description": "Increases player movement speed by 10%.",
+  "iconUrl": "https://cdn.example.com/powerups/speed_up.png",
+  "maxStack": 3
+}
+----

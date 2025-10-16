@@ -1,0 +1,306 @@
+=== Gameplay API
+
+The *Gameplay* resource handles player actions during a match and the real-time
+game state stream. REST endpoints are used to submit discrete actions, while a
+WebSocket channel is used to receive live updates (map tiles, bombs, power-ups,
+player positions, tick events).
+
+'''
+
+==== Place Bomb
+
+*Gameplay API v{revnumber}* – Place a bomb at the player’s current position.
+
+.Endpoint
+[source,http,subs="attributes"]
+----
+POST /api/v{revnumber}/actions/place-bomb
+----
+
+.Header Parameters
+[options="header",cols="2,1,4,3"]
+|===
+|Name |Required |Description |Example
+|Authorization |Yes |Bearer token used for authentication |Bearer eyJhbGciOiJIUzI1...
+|Content-Type |Yes |Defines the media type of the request body |application/json
+|===
+
+.Request
+[source,json]
+----
+{
+  "matchId": 201,
+  "fuseMs": 2000
+}
+----
+
+.Response
+[source,json]
+----
+{
+  "message": "Bomb placed"
+}
+----
+
+.Response Codes
+[options="header",cols="1,2"]
+|===
+|HTTP Code |Message
+|200 OK |Bomb placed
+|400 Bad Request |Invalid input or action not allowed
+|401 Unauthorized |Authentication required
+|403 Forbidden |No bomb available or rate-limited
+|404 Not Found |Match not found
+|===
+
+.Error Payload Example
+[source, json]
+----
+{
+  "code": "ACTION_NOT_ALLOWED",
+  "message": "You cannot place a bomb right now."
+}
+----
+
+.cURL Example
+[source,bash,subs="attributes"]
+----
+curl -X POST {api-url}/api/v{revnumber}/actions/place-bomb \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1..." \
+  -H "Content-Type: application/json" \
+  -d '{
+        "matchId": 201,
+        "fuseMs": 2000
+      }'
+----
+
+.Sample Response
+[source, json]
+----
+{
+  "message": "Bomb placed"
+}
+----
+
+'''
+
+==== Move
+
+*Gameplay API v{revnumber}* – Move the player in a cardinal direction.
+
+.Endpoint
+[source,http,subs="attributes"]
+----
+POST /api/v{revnumber}/actions/move
+----
+
+.Header Parameters
+[options="header",cols="2,1,4,3"]
+|===
+|Name |Required |Description |Example
+|Authorization |Yes |Bearer token used for authentication |Bearer eyJhbGciOiJIUzI1...
+|Content-Type |Yes |Defines the media type of the request body |application/json
+|===
+
+.Request
+[source, json]
+----
+{
+  "matchId": 201,
+  "direction": "UP",        // one of: UP, DOWN, LEFT, RIGHT
+  "ticks": 1                // optional, number of grid steps (default: 1)
+}
+----
+
+.Response
+[source, json]
+----
+{
+  "message": "Move accepted"
+}
+----
+
+.Response Codes
+[options="header",cols="1,2"]
+|===
+|HTTP Code |Message
+|200 OK |Move accepted
+|400 Bad Request |Invalid direction or payload
+|401 Unauthorized |Authentication required
+|403 Forbidden |Move blocked (tile, stun, or rate-limit)
+|404 Not Found |Match not found
+|===
+
+.Error Payload Example
+[source, json]
+----
+{
+  "code": "MOVE_BLOCKED",
+  "message": "Movement blocked by a wall or stun effect."
+}
+----
+
+.cURL Example
+[source,bash,subs="attributes"]
+----
+curl -X POST {api-url}/api/v{revnumber}/actions/move \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1..." \
+  -H "Content-Type: application/json" \
+  -d '{
+        "matchId": 201,
+        "direction": "UP",
+        "ticks": 1
+      }'
+----
+
+.Sample Response
+[source, json]
+----
+{
+  "message": "Move accepted"
+}
+----
+
+'''
+
+==== Collect Power-up
+
+*Gameplay API v{revnumber}* – Collect a power-up at the player’s position.
+
+.Endpoint
+[source,http,subs="attributes"]
+----
+POST /api/v{revnumber}/actions/collect-powerup
+----
+
+.Header Parameters
+[options="header",cols="2,1,4,3"]
+|===
+|Name |Required |Description |Example
+|Authorization |Yes |Bearer token used for authentication |Bearer eyJhbGciOiJIUzI1...
+|Content-Type |Yes |Defines the media type of the request body |application/json
+|===
+
+.Request
+[source, json]
+----
+{
+  "matchId": 201
+}
+----
+
+.Response
+[source, json]
+----
+{
+  "message": "Power-up collected"
+}
+----
+
+.Response Codes
+[options="header",cols="1,2"]
+|===
+|HTTP Code |Message
+|200 OK |Power-up collected
+|400 Bad Request |No power-up available to collect
+|401 Unauthorized |Authentication required
+|404 Not Found |Match not found
+|===
+
+.Error Payload Example
+[source, json]
+----
+{
+  "code": "NO_POWERUP",
+  "message": "There is no power-up at your position."
+}
+----
+
+.cURL Example
+[source,bash,subs="attributes"]
+----
+curl -X POST {api-url}/api/v{revnumber}/actions/collect-powerup \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1..." \
+  -H "Content-Type: application/json" \
+  -d '{ "matchId": 201 }'
+----
+
+.Sample Response
+[source, json]
+----
+{
+  "message": "Power-up collected"
+}
+----
+
+'''
+
+==== Realtime Game Stream (WebSocket)
+
+*Gameplay API v{revnumber}* – Subscribe to real-time match updates:
+map diffs, bomb timers/explosions, power-up spawns, player movements,
+and end-of-match events.
+
+.Endpoint
+[source,http,subs="attributes"]
+----
+WS /ws/v{revnumber}/game
+----
+
+.Header Parameters
+[options="header",cols="2,1,4,3"]
+|===
+|Name |Required |Description |Example
+|Sec-WebSocket-Protocol |Yes |JWT passed via subprotocol (or query param) |Bearer.<JWT>
+|Authorization |No |Alternative: Bearer token as HTTP header during upgrade |Bearer eyJhbGciOiJIUzI1...
+|===
+
+.Connection Examples
+[source,bash,subs="attributes"]
+----
+# wscat (subprotocol carries the token)
+wscat -c "{ws-url}/ws/v{revnumber}/game?matchId=201" -H "Sec-WebSocket-Protocol: Bearer.JWT"
+
+# JavaScript (browser)
+const socket = new WebSocket("{wss-url}/ws/v{revnumber}/game?matchId=201", "Bearer." + accessToken);
+socket.onmessage = (e) => console.log(JSON.parse(e.data));
+----
+
+.Server Messages (examples)
+[source,json]
+----
+[
+  { "type": "TICK", "ts": "2025-10-03T15:20:10Z" },
+  { "type": "MAP_DIFF", "changes": [ { "x": 5, "y": 7, "tile": "EMPTY" } ] },
+  { "type": "BOMB_PLANTED", "by": 12, "x": 3, "y": 4, "fuseMs": 2000 },
+  { "type": "BOMB_EXPLODED", "by": 12, "at": [3,4], "affected": [[3,3],[3,5],[2,4],[4,4]] },
+  { "type": "POWERUP_COLLECTED", "by": 12, "kind": "BOMB_UP" },
+  { "type": "PLAYER_MOVED", "id": 12, "x": 6, "y": 4, "dir": "RIGHT" },
+  { "type": "MATCH_ENDED", "winner": 12, "reason": "LAST_PLAYER_STANDING" }
+]
+----
+
+.Response Codes
+[options="header",cols="1,2"]
+|===
+|HTTP Code |Message
+|101 Switching Protocols |WebSocket upgrade successful
+|400 Bad Request |Missing matchId or invalid parameters
+|401 Unauthorized |Missing/invalid token
+|403 Forbidden |Not a participant of the match
+|404 Not Found |Match not found
+|===
+
+.Error Payload Example
+[source, json]
+----
+{
+  "code": "UNAUTHORIZED",
+  "message": "Missing or invalid token for WebSocket connection."
+}
+----
+
+.Notes
+* Use `matchId` as a required query parameter to scope the stream.
+* Rate limiting may apply for action endpoints; clients should handle `429 Too Many Requests` if configured.
+* Keep REST for commands; use WebSocket for state updates to minimize latency.

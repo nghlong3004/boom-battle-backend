@@ -1,0 +1,39 @@
+== HTTP
+
+HTTP verbs have the following default meanings:
+
+.HTTP
+[width="80%",options="header",cols="1,4"]
+|=======
+|Verb |Default usage of HTTP verb
+
+|GET
+|Retrieve information about a resource.
+The resource is identified using path variables.
+Query parameters can be used for filtering or searching.
+A request body is **not allowed**.
+
+|POST
+|Create a new resource or trigger a non-idempotent operation (e.g., start a job).
+The request body must contain the resource data.
+The newly created resource or job information is returned in the response body.
+Do not use query parameters.
+
+|PUT
+|Update an existing resource.
+The resource is identified using a path variable.
+The full representation of the resource must be sent in the request body.
+The updated resource is returned in the response body.
+Do not use query parameters.
+
+|PATCH
+|Partially update an existing resource.
+Only the fields to be changed are included in the request body.
+The updated resource is returned in the response body.
+
+|DELETE
+|Remove a resource.
+The resource is identified by its ID in the path variable.
+The request should not contain a body or query parameters.
+A response body is not required, though a status message may be included.
+|=======

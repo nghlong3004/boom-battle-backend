@@ -1,0 +1,302 @@
+=== Authentication API
+
+The *Authentication* resource manages the registration, login, and session lifecycle of players.
+It provides endpoints to register new accounts, log in to obtain JWT tokens, refresh tokens when they expire,
+and log out if necessary.
+Authentication is required for all protected resources in the Boom Battle API.
+
+==== Register Player
+
+*Register API v{revnumber}* – Create a new player account.
+
+.Endpoint
+[source,http,subs="attributes"]
+----
+POST /api/v{revnumber}/auth/register
+----
+
+.Header Parameters
+[options="header",cols="2,1,4,3"]
+|===
+|Name |Required |Description |Example
+|Content-Type |Yes |Defines the media type of the request body |application/json
+|===
+
+.Request
+[source,json]
+----
+{
+  "username": "new_player",
+  "password": "secret123",
+  "email": "player@example.com"
+}
+----
+
+.Response
+[source,json]
+----
+{
+  "message": "Registration successful"
+}
+----
+
+.Response Codes
+[options="header",cols="1,2"]
+|===
+|HTTP Code |Message
+|201 Created |Registration successful
+|400 Bad Request |Missing fields, weak password, or invalid email
+|409 Conflict |Username or email already exists
+|500 Internal Server Error |Unexpected error occurred
+|===
+
+.Error Payload Example
+[source,json]
+----
+{
+  "code": "BAD_REQUEST",
+  "message": "The username already exists."
+}
+----
+
+.cURL Example
+[source,bash,subs="attributes"]
+----
+curl -X POST {api-url}/api/v{revnumber}/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+        "username": "new_player",
+        "password": "secret123",
+        "email": "player@example.com"
+      }'
+----
+
+.Sample Response
+[source,json]
+----
+{
+  "message": "Registration successful"
+}
+----
+
+'''
+
+==== Login Player
+
+*Login API v{revnumber}* – Authenticate a player and issue JWT tokens.
+
+.Endpoint
+[source,http,subs="attributes"]
+----
+POST /api/v{revnumber}/auth/login
+----
+
+.Header Parameters
+[options="header",cols="2,1,4,3"]
+|===
+|Name |Required |Description |Example
+|Content-Type |Yes |Defines the media type of the request body |application/json
+|===
+
+.Request
+[source,json]
+----
+{
+  "username": "new_player",
+  "password": "secret123"
+}
+----
+
+.Response
+[source,json]
+----
+{
+  "accessToken": "eyJhbGciOiJIUzI1...",
+  "refreshToken": "eyJhbGciOiJIUzI1...",
+  "expiresIn": 3600
+}
+----
+
+.Response Codes
+[options="header",cols="1,2"]
+|===
+|HTTP Code |Message
+|200 OK |Login successful
+|400 Bad Request |Invalid request format
+|401 Unauthorized |Invalid username or password
+|500 Internal Server Error |Unexpected error occurred
+|===
+
+.Error Payload Example
+[source,json]
+----
+{
+  "code": "UNAUTHORIZED",
+  "message": "Invalid username or password."
+}
+----
+
+.cURL Example
+[source,bash,subs="attributes"]
+----
+curl -X POST {api-url}/api/v{revnumber}/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+        "username": "new_player",
+        "password": "secret123"
+      }'
+----
+
+.Sample Response
+[source,json]
+----
+{
+  "accessToken": "eyJhbGciOiJIUzI1...",
+  "refreshToken": "eyJhbGciOiJIUzI1...",
+  "expiresIn": 3600
+}
+----
+
+'''
+
+==== Refresh Token
+
+*Refresh Token API v{revnumber}* – Issue a new access token using a refresh token.
+
+.Endpoint
+[source,http,subs="attributes"]
+----
+POST /api/v{revnumber}/auth/refresh
+----
+
+.Header Parameters
+[options="header",cols="2,1,4,3"]
+|===
+|Name |Required |Description |Example
+|Content-Type |Yes |Defines the media type of the request body |application/json
+|===
+
+.Request
+[source,json]
+----
+{
+  "refreshToken": "eyJhbGciOiJIUzI1..."
+}
+----
+
+.Response
+[source,json]
+----
+{
+  "accessToken": "eyJhbGciOiJIUzI1...",
+  "expiresIn": 3600
+}
+----
+
+.Response Codes
+[options="header",cols="1,2"]
+|===
+|HTTP Code |Message
+|200 OK |Token refreshed successfully
+|400 Bad Request |Malformed or missing refresh token
+|401 Unauthorized |Refresh token expired or invalid
+|500 Internal Server Error |Unexpected error occurred
+|===
+
+.Error Payload Example
+[source,json]
+----
+{
+  "code": "UNAUTHORIZED",
+  "message": "Refresh token expired or invalid."
+}
+----
+
+.cURL Example
+[source,bash,subs="attributes"]
+----
+curl -X POST {api-url}/api/v{revnumber}/auth/refresh \
+  -H "Content-Type: application/json" \
+  -d '{
+        "refreshToken": "eyJhbGciOiJIUzI1..."
+      }'
+----
+
+.Sample Response
+[source,json]
+----
+{
+  "accessToken": "eyJhbGciOiJIUzI1...",
+  "expiresIn": 3600
+}
+----
+
+'''
+
+==== Logout Player
+
+*Logout API v{revnumber}* – Invalidate the current user session.
+
+.Endpoint
+[source,http,subs="attributes"]
+----
+POST /api/v{revnumber}/auth/logout
+----
+
+.Header Parameters
+[options="header",cols="2,1,4,3"]
+|===
+|Name |Required |Description |Example
+|Authorization |Yes |Bearer token used for authentication |Bearer eyJhbGciOiJIUzI1...
+|Content-Type |Yes |Defines the media type of the request body |application/json
+|===
+
+.Request
+[source,bash,subs="attributes"]
+----
+curl -X POST {api-url}/api/v{revnumber}/auth/logout \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json"
+----
+
+.Response
+[source,json]
+----
+{
+  "message": "Logout successful"
+}
+----
+
+.Response Codes
+[options="header",cols="1,2"]
+|===
+|HTTP Code |Message
+|204 No Content |Logout successful
+|401 Unauthorized |Token missing or invalid
+|500 Internal Server Error |Unexpected error occurred
+|===
+
+.Error Payload Example
+[source,json]
+----
+{
+  "code": "UNAUTHORIZED",
+  "message": "The provided token is invalid."
+}
+----
+
+.cURL Example
+[source,bash,subs="attributes"]
+----
+curl -X POST {api-url}/api/v{revnumber}/auth/logout \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1..." \
+  -H "Content-Type: application/json"
+----
+
+.Sample Response
+[source,json]
+----
+{
+  "message": "Logout successful"
+}
+----

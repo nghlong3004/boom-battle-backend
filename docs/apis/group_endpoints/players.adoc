@@ -1,0 +1,459 @@
+=== Players API
+
+The *Players* resource represents Boom Battle users.
+It provides endpoints to retrieve player information, update profiles,
+delete accounts, and view leaderboards. Listing endpoints support pagination.
+
+'''
+
+==== List Players
+
+*Players API v{revnumber}* – Retrieve a paginated list of players.
+
+.Endpoint
+[source,http,subs="attributes"]
+----
+GET /api/v{revnumber}/players
+----
+
+.Header Parameters
+[options="header",cols="2,1,4,3"]
+|===
+|Name |Required |Description |Example
+|Authorization |Yes |Bearer token used for authentication |Bearer eyJhbGciOiJIUzI1...
+|Accept |No |Preferred response media type |application/json
+|===
+
+.Query Parameters
+[options="header",cols="1,1,3,3"]
+|===
+|Name |Required |Description |Example
+|page |No |Zero-based page index (default: 0) |page=0
+|size |No |Page size (default: 20, max: 100) |size=20
+|sort |No |Sort criteria, `<field>,<asc or desc>` (repeatable) |sort=wins,desc
+|search |No |Filter by username (contains) |search=boom
+|===
+
+.Response
+[source,json]
+----
+{
+  "content": [
+    {
+      "id": 123,
+      "username": "boom_master",
+      "wins": 42,
+      "losses": 18,
+      "totalGames": 60
+    }
+  ],
+  "page": 0,
+  "size": 20,
+  "totalElements": 1,
+  "totalPages": 1
+}
+----
+
+.Response Codes
+[options="header",cols="1,2"]
+|===
+|HTTP Code |Message
+|200 OK |Players fetched successfully
+|401 Unauthorized |Authentication required
+|===
+
+.Error Payload Example
+[source, json]
+----
+{
+  "code": "UNAUTHORIZED",
+  "message": "Missing or invalid token."
+}
+----
+
+.cURL Example
+[source,bash,subs="attributes"]
+----
+curl -X GET "{api-url}/api/v{revnumber}/players?page=0&size=20&sort=wins,desc" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1..."
+----
+
+.Sample Response
+[source, json]
+----
+{
+  "content": [],
+  "page": 0,
+  "size": 20,
+  "totalElements": 0,
+  "totalPages": 0
+}
+----
+
+'''
+
+==== Get My Profile
+
+*Players API v{revnumber}* – Retrieve the profile of the authenticated player.
+
+.Endpoint
+[source,http,subs="attributes"]
+----
+GET /api/v{revnumber}/players/me
+----
+
+.Header Parameters
+[options="header",cols="2,1,4,3"]
+|===
+|Name |Required |Description |Example
+|Authorization |Yes |Bearer token used for authentication |Bearer eyJhbGciOiJIUzI1...
+|Accept |No |Preferred response media type |application/json
+|===
+
+.Response
+[source,json]
+----
+{
+  "id": 101,
+  "username": "new_player",
+  "email": "player@example.com",
+  "wins": 0,
+  "losses": 0,
+  "totalGames": 0,
+  "avatarUrl": null
+}
+----
+
+.Response Codes
+[options="header",cols="1,2"]
+|===
+|HTTP Code |Message
+|200 OK |Profile fetched successfully
+|401 Unauthorized |Authentication required
+|===
+
+.Error Payload Example
+[source, json]
+----
+{
+  "code": "UNAUTHORIZED",
+  "message": "Missing or invalid token."
+}
+----
+
+.cURL Example
+[source,bash,subs="attributes"]
+----
+curl -X GET {api-url}/api/v{revnumber}/players/me \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1..."
+----
+
+.Sample Response
+[source, json]
+----
+{
+  "id": 101,
+  "username": "new_player",
+  "email": "player@example.com",
+  "wins": 0,
+  "losses": 0,
+  "totalGames": 0,
+  "avatarUrl": null
+}
+----
+
+'''
+
+==== Get Player by ID
+
+*Players API v{revnumber}* – Retrieve details of a specific player.
+
+.Endpoint
+[source,http,subs="attributes"]
+----
+GET /api/v{revnumber}/players/{id}
+----
+
+.Header Parameters
+[options="header",cols="2,1,4,3"]
+|===
+|Name |Required |Description |Example
+|Authorization |Yes |Bearer token used for authentication |Bearer eyJhbGciOiJIUzI1...
+|Accept |No |Preferred response media type |application/json
+|===
+
+.Response
+[source,json]
+----
+{
+  "id": 123,
+  "username": "boom_master",
+  "wins": 42,
+  "losses": 18,
+  "totalGames": 60,
+  "avatarUrl": "https://cdn.example.com/a.png"
+}
+----
+
+.Response Codes
+[options="header",cols="1,2"]
+|===
+|HTTP Code |Message
+|200 OK |Player fetched successfully
+|401 Unauthorized |Authentication required
+|404 Not Found |Player not found
+|===
+
+.Error Payload Example
+[source, json]
+----
+{
+  "code": "PLAYER_NOT_FOUND",
+  "message": "The player with the specified ID does not exist."
+}
+----
+
+.cURL Example
+[source,bash,subs="attributes"]
+----
+curl -X GET {api-url}/api/v{revnumber}/players/123 \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1..."
+----
+
+.Sample Response
+[source, json]
+----
+{
+  "id": 123,
+  "username": "boom_master",
+  "wins": 42,
+  "losses": 18,
+  "totalGames": 60,
+  "avatarUrl": "https://cdn.example.com/a.png"
+}
+----
+
+'''
+
+==== Update Player
+
+*Players API v{revnumber}* – Update profile information for a player.
+
+.Endpoint
+[source,http,subs="attributes"]
+----
+PUT /api/v{revnumber}/players/{id}
+----
+
+.Header Parameters
+[options="header",cols="2,1,4,3"]
+|===
+|Name |Required |Description |Example
+|Authorization |Yes |Bearer token used for authentication |Bearer eyJhbGciOiJIUzI1...
+|Content-Type |Yes |Defines the media type of the request body |application/json
+|===
+
+.Request
+[source, json]
+----
+{
+  "username": "pro_battler",
+  "email": "new_email@example.com",
+  "avatarUrl": "https://cdn.example.com/new.png"
+}
+----
+
+.Response
+[source, json]
+----
+{
+  "id": 123,
+  "username": "pro_battler",
+  "email": "new_email@example.com",
+  "wins": 42,
+  "losses": 18,
+  "totalGames": 60,
+  "avatarUrl": "https://cdn.example.com/new.png"
+}
+----
+
+.Response Codes
+[options="header",cols="1,2"]
+|===
+|HTTP Code |Message
+|200 OK |Player updated successfully
+|400 Bad Request |Invalid input
+|401 Unauthorized |Authentication required
+|403 Forbidden |Not allowed to update this player
+|404 Not Found |Player not found
+|===
+
+.Error Payload Example
+[source, json]
+----
+{
+  "code": "FORBIDDEN",
+  "message": "You are not allowed to update this player."
+}
+----
+
+.cURL Example
+[source,bash,subs="attributes"]
+----
+curl -X PUT {api-url}/api/v{revnumber}/players/123 \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1..." \
+  -H "Content-Type: application/json" \
+  -d '{
+        "username": "pro_battler",
+        "email": "new_email@example.com",
+        "avatarUrl": "https://cdn.example.com/new.png"
+      }'
+----
+
+.Sample Response
+[source, json]
+----
+{
+  "id": 123,
+  "username": "pro_battler",
+  "email": "new_email@example.com",
+  "wins": 42,
+  "losses": 18,
+  "totalGames": 60,
+  "avatarUrl": "https://cdn.example.com/new.png"
+}
+----
+
+'''
+
+==== Delete Player
+
+*Players API v{revnumber}* – Delete a player account.
+
+.Endpoint
+[source,http,subs="attributes"]
+----
+DELETE /api/v{revnumber}/players/{id}
+----
+
+.Header Parameters
+[options="header",cols="2,1,4,3"]
+|===
+|Name |Required |Description |Example
+|Authorization |Yes |Bearer token used for authentication |Bearer eyJhbGciOiJIUzI1...
+|===
+
+.Response
+[source, json]
+----
+{
+  "message": "Player deleted successfully"
+}
+----
+
+.Response Codes
+[options="header",cols="1,2"]
+|===
+|HTTP Code |Message
+|204 No Content |Player deleted successfully
+|401 Unauthorized |Authentication required
+|403 Forbidden |Not allowed to delete this player
+|404 Not Found |Player not found
+|===
+
+.Error Payload Example
+[source, json]
+----
+{
+  "code": "FORBIDDEN",
+  "message": "You are not allowed to delete this player."
+}
+----
+
+.cURL Example
+[source,bash,subs="attributes"]
+----
+curl -X DELETE {api-url}/api/v{revnumber}/players/123 \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1..."
+----
+
+.Sample Response
+[source, json]
+----
+{
+  "message": "Player deleted successfully"
+}
+----
+
+'''
+
+==== Leaderboard
+
+*Players API v{revnumber}* – Retrieve the public leaderboard (top players).
+
+.Endpoint
+[source,http,subs="attributes"]
+----
+GET /api/v{revnumber}/players/leaderboard
+----
+
+.Header Parameters
+[options="header",cols="2,1,4,3"]
+|===
+|Name |Required |Description |Example
+|Authorization |No |Bearer token (optional if public) |Bearer eyJhbGciOiJIUzI1...
+|Accept |No |Preferred response media type |application/json
+|===
+
+.Query Parameters
+[options="header",cols="1,1,3,3"]
+|===
+|Name |Required |Description |Example
+|limit |No |Number of top players to return (default: 10, max: 100) |limit=20
+|offset |No |Offset for pagination (default: 0) |offset=0
+|===
+
+.Response
+[source, json]
+----
+{
+  "players": [
+    { "id": 1, "username": "legend_1", "wins": 250, "totalGames": 400 },
+    { "id": 2, "username": "legend_2", "wins": 230, "totalGames": 390 }
+  ],
+  "limit": 10,
+  "offset": 0
+}
+----
+
+.Response Codes
+[options="header",cols="1,2"]
+|===
+|HTTP Code |Message
+|200 OK |Leaderboard fetched successfully
+|===
+
+.Error Payload Example
+[source, json]
+----
+{
+  "code": "INVALID_PARAM",
+  "message": "The provided limit is out of range."
+}
+----
+
+.cURL Example
+[source,bash,subs="attributes"]
+----
+curl -X GET "{api-url}/api/v{revnumber}/players/leaderboard?limit=10&offset=0"
+----
+
+.Sample Response
+[source, json]
+----
+{
+  "players": [],
+  "limit": 10,
+  "offset": 0
+}
+----

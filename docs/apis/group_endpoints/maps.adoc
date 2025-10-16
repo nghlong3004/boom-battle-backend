@@ -1,0 +1,181 @@
+=== Maps API
+
+The *Maps* resource exposes read-only metadata for game maps available in Boom Battle.
+Clients can list maps (with pagination) and fetch the details of a specific map.
+Creation/update/deletion of maps is not exposed via public API.
+
+'''
+
+==== List Maps
+
+*Maps API v{revnumber}* – Retrieve a paginated list of available maps.
+
+.Endpoint
+[source,http,subs="attributes"]
+----
+GET /api/v{revnumber}/maps
+----
+
+.Header Parameters
+[options="header",cols="2,1,4,3"]
+|===
+|Name |Required |Description |Example
+|Authorization |No |Bearer token (optional if maps are public) |Bearer eyJhbGciOiJIUzI1...
+|Accept |No |Preferred response media type |application/json
+|===
+
+.Query Parameters
+[options="header",cols="1,1,3,3"]
+|===
+|Name |Required |Description |Example
+|page |No |Zero-based page index (default: 0) |page=0
+|size |No |Page size (default: 20, max: 100) |size=20
+|sort |No |Sort criteria, `<field>,<asc or desc>` |sort=name,asc
+|theme |No |Filter by theme (e.g., *classic*, *desert*, *ice*) |theme=classic
+|minPlayers |No |Minimum supported players |minPlayers=2
+|maxPlayers |No |Maximum supported players |maxPlayers=4
+|===
+
+.Response
+[source,json]
+----
+{
+  "content": [
+    {
+      "id": 10,
+      "name": "Classic Arena",
+      "theme": "classic",
+      "size": { "width": 15, "height": 13 },
+      "minPlayers": 2,
+      "maxPlayers": 4,
+      "destructibleRatio": 0.35,
+      "tileset": "tileset_v1",
+      "previewUrl": "https://cdn.example.com/maps/10.png"
+    }
+  ],
+  "page": 0,
+  "size": 20,
+  "totalElements": 1,
+  "totalPages": 1
+}
+----
+
+.Response Codes
+[options="header",cols="1,2"]
+|===
+|HTTP Code |Message
+|200 OK |Maps fetched successfully
+|401 Unauthorized |Authentication required (if not public)
+|===
+
+.Error Payload Example
+[source, json]
+----
+{
+  "code": "UNAUTHORIZED",
+  "message": "Missing or invalid token."
+}
+----
+
+.cURL Example
+[source,bash,subs="attributes"]
+----
+curl -X GET "{api-url}/api/v{revnumber}/maps?page=0&size=20&sort=name,asc" \
+  -H "Accept: application/json"
+----
+
+.Sample Response
+[source, json]
+----
+{
+  "content": [],
+  "page": 0,
+  "size": 20,
+  "totalElements": 0,
+  "totalPages": 0
+}
+----
+
+'''
+
+==== Get Map by ID
+
+*Maps API v{revnumber}* – Retrieve metadata and layout info for a specific map.
+
+.Endpoint
+[source,http,subs="attributes"]
+----
+GET /api/v{revnumber}/maps/{id}
+----
+
+.Header Parameters
+[options="header",cols="2,1,4,3"]
+|===
+|Name |Required |Description |Example
+|Authorization |No |Bearer token (optional if maps are public) |Bearer eyJhbGciOiJIUzI1...
+|Accept |No |Preferred response media type |application/json
+|===
+
+.Response
+[source,json]
+----
+{
+  "id": 10,
+  "name": "Classic Arena",
+  "theme": "classic",
+  "size": { "width": 15, "height": 13 },
+  "minPlayers": 2,
+  "maxPlayers": 4,
+  "destructibleRatio": 0.35,
+  "tileset": "tileset_v1",
+  "spawnPoints": [[1,1],[13,11],[1,11],[13,1]],
+  "previewUrl": "https://cdn.example.com/maps/10.png",
+  "layout": {
+    "encoding": "RLE",
+    "legend": { "W": "WALL", "B": "BREAKABLE", "E": "EMPTY" },
+    "data": "W15; (E1,W1)x7; ..."
+  }
+}
+----
+
+.Response Codes
+[options="header",cols="1,2"]
+|===
+|HTTP Code |Message
+|200 OK |Map fetched successfully
+|401 Unauthorized |Authentication required (if not public)
+|404 Not Found |Map not found
+|===
+
+.Error Payload Example
+[source, json]
+----
+{
+  "code": "MAP_NOT_FOUND",
+  "message": "The map with the specified ID does not exist."
+}
+----
+
+.cURL Example
+[source,bash,subs="attributes"]
+----
+curl -X GET {api-url}/api/v{revnumber}/maps/10 \
+  -H "Accept: application/json"
+----
+
+.Sample Response
+[source, json]
+----
+{
+  "id": 10,
+  "name": "Classic Arena",
+  "theme": "classic",
+  "size": { "width": 15, "height": 13 },
+  "minPlayers": 2,
+  "maxPlayers": 4,
+  "destructibleRatio": 0.35,
+  "tileset": "tileset_v1",
+  "spawnPoints": [[1,1],[13,11],[1,11],[13,1]],
+  "previewUrl": "https://cdn.example.com/maps/10.png"
+}
+----

@@ -1,0 +1,36 @@
+== Default response codes
+
+Here are the meanings of the most commonly used HTTP response codes:
+
+.Default response codes
+[width="80%",options="header",cols="1,4"]
+|=======
+|Code |Meaning
+
+|200 OK
+|The request was successful. The response body contains the requested data or confirmation.
+
+|201 Created
+|A new resource was successfully created. The response body contains the created resource.
+
+|204 No Content
+|The request was successful, but there is no content to return (often used with DELETE).
+
+|400 Bad Request
+|The request is malformed or missing required parameters. The error details are given in the response body.
+
+|401 Unauthorized
+|Authentication failed or was not provided. The client must include a valid token.
+
+|403 Forbidden
+|The client is authenticated but not authorized to access the requested resource.
+
+|404 Not Found
+|The requested resource does not exist.
+
+|409 Conflict
+|The request could not be completed due to a conflict (e.g., duplicate data, version conflict).
+
+|500 Internal Server Error
+|An unexpected error occurred on the server.
+|=======

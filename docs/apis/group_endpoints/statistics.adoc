@@ -1,0 +1,254 @@
+=== Statistics API
+
+The *Statistics* resource provides aggregated information about players, matches, and
+global gameplay metrics. These endpoints are useful for dashboards, leaderboards, and
+player progress tracking.
+
+'''
+
+==== Player Statistics
+
+*Statistics API v{revnumber}* – Retrieve statistics for a single player.
+
+.Endpoint
+[source,http,subs="attributes"]
+----
+GET /api/v{revnumber}/statistics/players/{id}
+----
+
+.Header Parameters
+[options="header",cols="2,1,4,3"]
+|===
+|Name |Required |Description |Example
+|Authorization |Yes |Bearer token used for authentication |Bearer eyJhbGciOiJIUzI1...
+|Accept |No |Preferred response media type |application/json
+|===
+
+.Response
+[source,json]
+----
+{
+  "playerId": 101,
+  "username": "new_player",
+  "wins": 15,
+  "losses": 20,
+  "totalGames": 35,
+  "winRate": 0.428,
+  "totalBombsPlaced": 120,
+  "totalPowerupsCollected": 45,
+  "lastMatchAt": "2025-10-01T14:10:00Z"
+}
+----
+
+.Response Codes
+[options="header",cols="1,2"]
+|===
+|HTTP Code |Message
+|200 OK |Statistics fetched successfully
+|401 Unauthorized |Authentication required
+|404 Not Found |Player not found
+|===
+
+.Error Payload Example
+[source,json]
+----
+{
+  "code": "PLAYER_NOT_FOUND",
+  "message": "The player with the specified ID does not exist."
+}
+----
+
+.cURL Example
+[source,bash,subs="attributes"]
+----
+curl -X GET {api-url}/api/v{revnumber}/statistics/players/101 \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1..."
+----
+
+.Sample Response
+[source, json]
+----
+{
+  "playerId": 101,
+  "username": "new_player",
+  "wins": 15,
+  "losses": 20,
+  "totalGames": 35,
+  "winRate": 0.428,
+  "totalBombsPlaced": 120,
+  "totalPowerupsCollected": 45,
+  "lastMatchAt": "2025-10-01T14:10:00Z"
+}
+----
+
+'''
+
+==== Match Statistics
+
+*Statistics API v{revnumber}* – Retrieve detailed statistics for a specific match.
+
+.Endpoint
+[source,http,subs="attributes"]
+----
+GET /api/v{revnumber}/statistics/matches/{id}
+----
+
+.Header Parameters
+[options="header",cols="2,1,4,3"]
+|===
+|Name |Required |Description |Example
+|Authorization |Yes |Bearer token used for authentication |Bearer eyJhbGciOiJIUzI1...
+|Accept |No |Preferred response media type |application/json
+|===
+
+.Response
+[source,json]
+----
+{
+  "matchId": 201,
+  "mapId": 10,
+  "status": "FINISHED",
+  "startedAt": "2025-10-01T14:10:00Z",
+  "endedAt": "2025-10-01T14:25:00Z",
+  "durationSec": 900,
+  "winnerId": 123,
+  "playerStats": [
+    {
+      "playerId": 123,
+      "username": "boom_master",
+      "kills": 5,
+      "deaths": 1,
+      "bombsPlaced": 20,
+      "powerupsCollected": 6
+    },
+    {
+      "playerId": 124,
+      "username": "rookie",
+      "kills": 1,
+      "deaths": 4,
+      "bombsPlaced": 15,
+      "powerupsCollected": 2
+    }
+  ]
+}
+----
+
+.Response Codes
+[options="header",cols="1,2"]
+|===
+|HTTP Code |Message
+|200 OK |Statistics fetched successfully
+|401 Unauthorized |Authentication required
+|404 Not Found |Match not found
+|===
+
+.Error Payload Example
+[source, json]
+----
+{
+  "code": "MATCH_NOT_FOUND",
+  "message": "The match with the specified ID does not exist."
+}
+----
+
+.cURL Example
+[source,bash,subs="attributes"]
+----
+curl -X GET {api-url}/api/v{revnumber}/statistics/matches/201 \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1..."
+----
+
+.Sample Response
+[source, json]
+----
+{
+  "matchId": 201,
+  "mapId": 10,
+  "status": "FINISHED",
+  "startedAt": "2025-10-01T14:10:00Z",
+  "endedAt": "2025-10-01T14:25:00Z",
+  "durationSec": 900,
+  "winnerId": 123,
+  "playerStats": [
+    {
+      "playerId": 101,
+      "username": "new_player",
+      "kills": 5,
+      "deaths": 2,
+      "bombsPlaced": 30,
+      "powerupsCollected": 10,
+      "score": 1500
+    },
+    {
+      "playerId": 123,
+      "username": "champion",
+      "kills": 8,
+      "deaths": 1,
+      "bombsPlaced": 40,
+      "powerupsCollected": 15,
+      "score": 2000
+    }
+  ]
+}
+----
+
+'''
+
+==== Global Statistics
+
+*Statistics API v{revnumber}* – Retrieve aggregated statistics across the game.
+
+.Endpoint
+[source,http,subs="attributes"]
+----
+GET /api/v{revnumber}/statistics/global
+----
+
+.Header Parameters
+[options="header",cols="2,1,4,3"]
+|===
+|Name |Required |Description |Example
+|Authorization |No |Bearer token (optional if public) |Bearer eyJhbGciOiJIUzI1...
+|Accept |No |Preferred response media type |application/json
+|===
+
+.Response
+[source, json]
+----
+{
+  "totalPlayers": 540,
+  "totalMatches": 1200,
+  "activeMatches": 15,
+  "avgMatchDurationSec": 780,
+  "mostUsedMap": "Classic Arena",
+  "mostCollectedPowerup": "BOMB_UP",
+  "timestamp": "2025-10-03T12:00:00Z"
+}
+----
+
+.Response Codes
+[options="header",cols="1,2"]
+|===
+|HTTP Code |Message
+|200 OK |Statistics fetched successfully
+|===
+
+.cURL Example
+[source,bash,subs="attributes"]
+----
+curl -X GET {api-url}/api/v{revnumber}/statistics/global
+----
+
+.Sample Response
+[source, json]
+----
+{
+  "totalPlayers": 540,
+  "totalMatches": 1200,
+  "activeMatches": 15,
+  "avgMatchDurationSec": 780,
+  "mostUsedMap": "Classic Arena",
+  "mostCollectedPowerup": "BOMB_UP",
+  "timestamp": "2025-10-03T12:00:00Z"
+}
+----

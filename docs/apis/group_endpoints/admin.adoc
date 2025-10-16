@@ -1,0 +1,323 @@
+=== Admin API
+
+The *Admin* resource provides management endpoints for administrators of the Boom Battle platform.
+These endpoints allow listing all players, managing matches, and retrieving global statistics.
+**Note:** All Admin endpoints require elevated privileges (e.g., role=ADMIN).
+
+'''
+
+==== List All Players
+
+*Admin API v{revnumber}* – Retrieve all players in the system with pagination.
+
+.Endpoint
+[source,http,subs="attributes"]
+----
+GET /api/v{revnumber}/admin/players
+----
+
+.Header Parameters
+[options="header",cols="2,1,4,3"]
+|===
+|Name |Required |Description |Example
+|Authorization |Yes |Bearer token with ADMIN role |Bearer eyJhbGciOiJIUzI1...
+|Accept |No |Preferred response media type |application/json
+|===
+
+.Query Parameters
+[options="header",cols="1,1,3,3"]
+|===
+|Name |Required |Description |Example
+|page |No |Zero-based page index (default: 0) |page=0
+|size |No |Page size (default: 20) |size=20
+|sort |No |Sort criteria, `<field>,<asc or desc>` |sort=createdAt,desc
+|===
+
+.Response
+[source,json]
+----
+{
+  "content": [
+    {
+      "id": 1,
+      "username": "admin",
+      "email": "admin@example.com",
+      "role": "ADMIN",
+      "createdAt": "2025-01-01T12:00:00Z"
+    },
+    {
+      "id": 2,
+      "username": "boom_master",
+      "email": "boom@example.com",
+      "role": "PLAYER",
+      "createdAt": "2025-02-05T08:20:00Z"
+    }
+  ],
+  "page": 0,
+  "size": 20,
+  "totalElements": 2,
+  "totalPages": 1
+}
+----
+
+.Response Codes
+[options="header",cols="1,2"]
+|===
+|HTTP Code |Message
+|200 OK |Players fetched successfully
+|401 Unauthorized |Authentication required
+|403 Forbidden |Admin privileges required
+|===
+
+.Error Payload Example
+[source,json]
+----
+{
+  "code": "FORBIDDEN",
+  "message": "You are not authorized to access this resource."
+}
+----
+
+.cURL Example
+[source,bash,subs="attributes"]
+----
+curl -X GET "{api-url}/api/v{revnumber}/admin/players?page=0&size=20" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1..."
+----
+
+.Sample Response
+[source, json]
+----
+{
+  "content": [],
+  "page": 0,
+  "size": 20,
+  "totalElements": 0,
+  "totalPages": 0
+}
+----
+
+'''
+
+==== List All Matches
+
+*Admin API v{revnumber}* – Retrieve all matches in the system with pagination.
+
+.Endpoint
+[source,http,subs="attributes"]
+----
+GET /api/v{revnumber}/admin/matches
+----
+
+.Header Parameters
+[options="header",cols="2,1,4,3"]
+|===
+|Name |Required |Description |Example
+|Authorization |Yes |Bearer token with ADMIN role |Bearer eyJhbGciOiJIUzI1...
+|Accept |No |Preferred response media type |application/json
+|===
+
+.Query Parameters
+[options="header",cols="1,1,3,3"]
+|===
+|Name |Required |Description |Example
+|page |No |Zero-based page index (default: 0) |page=0
+|size |No |Page size (default: 20) |size=20
+|sort |No |Sort criteria, `<field>,<asc or desc>` |sort=startedAt,desc
+|status |No |Filter matches by status (OPEN, FINISHED, IN_PROGRESS) |status=FINISHED
+|===
+
+.Response
+[source,json]
+----
+{
+  "content": [
+    {
+      "id": 201,
+      "name": "Battle Room 1",
+      "status": "FINISHED",
+      "mapId": 10,
+      "createdAt": "2025-10-01T14:10:00Z"
+    }
+  ],
+  "page": 0,
+  "size": 20,
+  "totalElements": 1,
+  "totalPages": 1
+}
+----
+
+.Response Codes
+[options="header",cols="1,2"]
+|===
+|HTTP Code |Message
+|200 OK |Matches fetched successfully
+|401 Unauthorized |Authentication required
+|403 Forbidden |Admin privileges required
+|===
+
+.Error Payload Example
+[source, json]
+----
+{
+  "code": "FORBIDDEN",
+  "message": "You are not authorized to access this resource."
+}
+----
+
+.cURL Example
+[source,bash,subs="attributes"]
+----
+curl -X GET "{api-url}/api/v{revnumber}/admin/matches?status=FINISHED" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1..."
+----
+
+.Sample Response
+[source, json]
+----
+{
+  "content": [],
+  "page": 0,
+  "size": 20,
+  "totalElements": 0,
+  "totalPages": 0
+}
+----
+
+'''
+
+==== Delete Player
+
+*Admin API v{revnumber}* – Permanently delete a player account.
+
+.Endpoint
+[source,http,subs="attributes"]
+----
+DELETE /api/v{revnumber}/admin/players/{id}
+----
+
+.Header Parameters
+[options="header",cols="2,1,4,3"]
+|===
+|Name |Required |Description |Example
+|Authorization |Yes |Bearer token with ADMIN role |Bearer eyJhbGciOiJIUzI1...
+|===
+
+.Response
+[source,json]
+----
+{
+  "message": "Player deleted by admin"
+}
+----
+
+.Response Codes
+[options="header",cols="1,2"]
+|===
+|HTTP Code |Message
+|204 No Content |Player deleted successfully
+|401 Unauthorized |Authentication required
+|403 Forbidden |Admin privileges required
+|404 Not Found |Player not found
+|===
+
+.Error Payload Example
+[source, json]
+----
+{
+  "code": "PLAYER_NOT_FOUND",
+  "message": "The player with ID 999 does not exist."
+}
+----
+
+.cURL Example
+[source,bash,subs="attributes"]
+----
+curl -X DELETE {api-url}/api/v{revnumber}/admin/players/123 \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1..."
+----
+
+.Sample Response
+[source, json]
+----
+{
+  "message": "Player deleted by admin"
+}
+----
+
+'''
+
+==== Global System Statistics (Admin)
+
+*Admin API v{revnumber}* – Retrieve aggregated system statistics for monitoring.
+
+.Endpoint
+[source,http,subs="attributes"]
+----
+GET /api/v{revnumber}/admin/statistics
+----
+
+.Header Parameters
+[options="header",cols="2,1,4,3"]
+|===
+|Name |Required |Description |Example
+|Authorization |Yes |Bearer token with ADMIN role |Bearer eyJhbGciOiJIUzI1...
+|Accept |No |Preferred response media type |application/json
+|===
+
+.Response
+[source,json]
+----
+{
+  "totalPlayers": 540,
+  "totalMatches": 1200,
+  "activeMatches": 15,
+  "avgMatchDurationSec": 780,
+  "systemLoad": {
+    "cpu": "45%",
+    "memory": "3.2 GB / 8 GB"
+  },
+  "timestamp": "2025-10-03T12:00:00Z"
+}
+----
+
+.Response Codes
+[options="header",cols="1,2"]
+|===
+|HTTP Code |Message
+|200 OK |Admin statistics fetched successfully
+|401 Unauthorized |Authentication required
+|403 Forbidden |Admin privileges required
+|===
+
+.Error Payload Example
+[source, json]
+----
+{
+  "code": "FORBIDDEN",
+  "message": "You are not authorized to access this resource."
+}
+----
+
+.cURL Example
+[source,bash,subs="attributes"]
+----
+curl -X GET {api-url}/api/v{revnumber}/admin/statistics \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1..."
+----
+
+.Sample Response
+[source, json]
+----
+{
+  "totalPlayers": 540,
+  "totalMatches": 1200,
+  "activeMatches": 15,
+  "avgMatchDurationSec": 780,
+  "systemLoad": {
+    "cpu": "45%",
+    "memory": "3.2 GB / 8 GB"
+  },
+  "timestamp": "2025-10-03T12:00:00Z"
+}
+----

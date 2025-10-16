@@ -1,0 +1,165 @@
+=== Data Structures
+
+The following data structures are commonly reused across multiple endpoints.
+
+'''
+
+==== PlayerResource [[playerresource]]
+
+Represents a Boom Battle player.
+
+[source,json]
+----
+{
+  "id": 123,
+  "username": "boom_master",
+  "email": "player@example.com",
+  "wins": 42,
+  "losses": 18,
+  "totalGames": 60,
+  "avatarUrl": "https://cdn.example.com/a.png",
+  "createdAt": "2025-01-01T12:00:00Z"
+}
+----
+
+*Fields*
+[options="header",cols="1,1,4"]
+|===
+|Name |Type |Description
+|id |integer |Unique player identifier
+|username |string |Unique username of the player
+|email |string |Email address (optional in some responses)
+|wins |integer |Number of matches won
+|losses |integer |Number of matches lost
+|totalGames |integer |Total matches played
+|avatarUrl |string |URL of the player avatar image
+|createdAt |datetime |Timestamp of account creation
+|===
+
+'''
+
+==== MatchResource [[matchresource]]
+
+Represents a game match.
+
+[source,json]
+----
+{
+  "id": 201,
+  "name": "Battle Room 1",
+  "status": "OPEN",
+  "mapId": 10,
+  "maxPlayers": 4,
+  "players": [ { "id": 123, "username": "boom_master" } ],
+  "createdAt": "2025-10-01T14:10:00Z"
+}
+----
+
+*Fields*
+[options="header",cols="1,1,4"]
+|===
+|Name |Type |Description
+|id |integer |Unique match identifier
+|name |string |Name of the match
+|status |string |Match state (`OPEN`, `IN_PROGRESS`, `FINISHED`)
+|mapId |integer |ID of the map used for this match
+|maxPlayers |integer |Maximum allowed players
+|players |array(PlayerResource) |List of players currently in match
+|createdAt |datetime |When the match was created
+|===
+
+'''
+
+==== MapResource [[mapresource]]
+
+Represents a playable map.
+
+[source, json]
+----
+{
+  "id": 10,
+  "name": "Classic Arena",
+  "theme": "classic",
+  "size": { "width": 15, "height": 13 },
+  "minPlayers": 2,
+  "maxPlayers": 4,
+  "destructibleRatio": 0.35,
+  "tileset": "tileset_v1",
+  "spawnPoints": [[1,1],[13,11]],
+  "previewUrl": "https://cdn.example.com/maps/10.png"
+}
+----
+
+*Fields*
+[options="header",cols="1,1,4"]
+|===
+|Name |Type |Description
+|id |integer |Unique map identifier
+|name |string |Name of the map
+|theme |string |Map theme (classic, desert, ice…)
+|size |object |Width/height of the map
+|minPlayers |integer |Minimum supported players
+|maxPlayers |integer |Maximum supported players
+|destructibleRatio |float |Percentage of destructible blocks
+|tileset |string |Tileset identifier
+|spawnPoints |array |Spawn coordinates
+|previewUrl |string |Preview image URL
+|===
+
+'''
+
+==== PowerupResource [[powerupresource]]
+
+Represents a power-up.
+
+[source,json]
+----
+{
+  "id": "BOMB_UP",
+  "name": "Extra Bomb",
+  "description": "Allows the player to place one more bomb at the same time.",
+  "iconUrl": "https://cdn.example.com/powerups/bomb_up.png",
+  "maxStack": 5
+}
+----
+
+*Fields*
+[options="header",cols="1,1,4"]
+|===
+|Name |Type |Description
+|id |string |Unique power-up identifier
+|name |string |Human-readable name
+|description |string |Effect of the power-up
+|iconUrl |string |Icon image URL
+|maxStack |integer |Maximum allowed stack count
+|===
+
+'''
+
+==== StatisticsResource [[statisticsresource]]
+
+Represents player or match statistics.
+
+[source,json]
+----
+{
+  "wins": 15,
+  "losses": 20,
+  "totalGames": 35,
+  "winRate": 0.428,
+  "totalBombsPlaced": 120,
+  "totalPowerupsCollected": 45
+}
+----
+
+*Fields*
+[options="header",cols="1,1,4"]
+|===
+|Name |Type |Description
+|wins |integer |Number of matches won
+|losses |integer |Number of matches lost
+|totalGames |integer |Total matches played
+|winRate |float |Win rate (wins / totalGames)
+|totalBombsPlaced |integer |Total bombs placed across matches
+|totalPowerupsCollected |integer |Total power-ups collected
+|===
