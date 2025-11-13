@@ -91,7 +91,7 @@ public class RoomService {
 
     public Room updateReady(String bomberId, String data) {
         log.debug("bomberId {} is ready", bomberId);
-        boolean isReady = "true".contains(data);
+        boolean isReady = data.contains("true");
         return updateReadyOrMapOrSkin(bomberId, isReady, null, null);
     }
 
@@ -101,7 +101,7 @@ public class RoomService {
     }
 
     public Room updateSkin(String bomberId, String data) throws JsonProcessingException {
-        log.debug("bomberId: {} is change skin", bomberId);
+        log.debug("bomberId: {} is changing skin", bomberId);
         SkinType skinType = objectMapper.readValue(data, SkinType.class);
         return updateReadyOrMapOrSkin(bomberId, null, null, skinType);
     }
@@ -116,6 +116,7 @@ public class RoomService {
                 else if (skinType != null) {
                     bomberInfo.setSkin(skinType);
                 }
+                break;
             }
         }
         return room;
