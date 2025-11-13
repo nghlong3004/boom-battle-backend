@@ -32,6 +32,7 @@ public class GameWebSocketManager {
             case JOIN_ROOM -> roomController.join(session, message.data());
             case ROOM_LIST -> roomController.list(session);
             case LEAVE_ROOM -> roomController.leave(session);
+            case CHAT_MESSAGE -> roomController.chat(session, message.data());
         }
     }
 

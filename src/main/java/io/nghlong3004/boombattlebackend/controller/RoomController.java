@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.nghlong3004.boombattlebackend.model.Message;
 import io.nghlong3004.boombattlebackend.model.MessageType;
 import io.nghlong3004.boombattlebackend.model.game.Room;
+import io.nghlong3004.boombattlebackend.model.request.ChatMessageRequest;
 import io.nghlong3004.boombattlebackend.model.request.CreateRoomRequest;
 import io.nghlong3004.boombattlebackend.model.request.JoinRoomRequest;
 import io.nghlong3004.boombattlebackend.service.BomberService;
@@ -52,6 +53,12 @@ public class RoomController {
         Message message = new Message(MessageType.LEAVE_ROOM, "");
         response(session, message);
         Room room = roomService.leave(session.getId());
+        updateRoom(room);
+    }
+
+    public void chat(WebSocketSession session, String data) throws IOException {
+        var chatMessageRequest = objectMapper.readValue(data, ChatMessageRequest.class);
+        Room room = roomService.chat(chatMessageRequest);
         updateRoom(room);
     }
 

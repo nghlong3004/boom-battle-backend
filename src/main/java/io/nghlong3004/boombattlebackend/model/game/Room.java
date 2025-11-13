@@ -16,4 +16,5 @@ public class Room {
     private List<BomberInfo> bomberInfos;
     private Integer maxBomber;
     private MapType map;
+    private List<ChatMessage> chatMessages;
 }

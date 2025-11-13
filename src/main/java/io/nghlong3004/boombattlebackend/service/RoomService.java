@@ -3,7 +3,9 @@ package io.nghlong3004.boombattlebackend.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.nghlong3004.boombattlebackend.model.game.BomberInfo;
+import io.nghlong3004.boombattlebackend.model.game.ChatMessage;
 import io.nghlong3004.boombattlebackend.model.game.Room;
+import io.nghlong3004.boombattlebackend.model.request.ChatMessageRequest;
 import io.nghlong3004.boombattlebackend.model.request.CreateRoomRequest;
 import io.nghlong3004.boombattlebackend.model.request.JoinRoomRequest;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ public class RoomService {
 
     public String create(CreateRoomRequest createRoomRequest) throws JsonProcessingException {
         Room room = fromCreateRoomRequest(createRoomRequest);
+        room.setChatMessages(new ArrayList<>());
         rooms.put(room.getId(), room);
         log.info("Create room width id: {}", room.getId());
         return objectMapper.writeValueAsString(room);
@@ -43,6 +46,9 @@ public class RoomService {
         }
         room.getBomberInfos()
             .add(joinRoomRequest.bomberInfo());
+        room.getChatMessages()
+            .add(new ChatMessage("System", "%s join room".formatted(joinRoomRequest.bomberInfo()
+                                                                                   .getName())));
         log.info("Join room {}.", room.getId());
         return room;
     }
@@ -65,11 +71,17 @@ public class RoomService {
         var entry = entryOpt.get();
         String roomId = entry.getKey();
         Room room = entry.getValue();
-        
-        log.info("remove bomber by bomberId in room");
-        room.getBomberInfos()
-            .removeIf(info -> info.getId()
-                                  .equals(bomberId));
+        String bomberName = null;
+        log.info("get bomber name and remove bomber by bomberId in room");
+        for (var bomberInfo : room.getBomberInfos()) {
+            if (bomberInfo.getId()
+                          .equals(bomberId)) {
+                bomberName = bomberInfo.getName();
+                room.getBomberInfos()
+                    .remove(bomberInfo);
+                break;
+            }
+        }
 
         log.info("remove room if list bomber info is empty");
         if (room.getBomberInfos()
@@ -77,9 +89,25 @@ public class RoomService {
             rooms.remove(roomId, room);
             return null;
         }
+        var chatMessage = new ChatMessage("System", "%s leave room".formatted(bomberName));
+        room.getChatMessages()
+            .add(chatMessage);
         return room;
     }
 
+    public Room chat(ChatMessageRequest chatMessageRequest) {
+        Room room = rooms.get(chatMessageRequest.roomId());
+        if (room == null) {
+            log.info("roomId: {} not found", chatMessageRequest.roomId());
+            return null;
+        }
+
+        room.getChatMessages()
+            .add(new ChatMessage(chatMessageRequest.owner(), chatMessageRequest.content()));
+
+        return room;
+
+    }
 
     private Room fromCreateRoomRequest(CreateRoomRequest createRoomRequest) {
         String id = String.valueOf(System.currentTimeMillis());
