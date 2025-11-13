@@ -34,6 +34,8 @@ public class GameWebSocketManager {
             case LEAVE_ROOM -> roomController.leave(session);
             case CHAT_MESSAGE -> roomController.chat(session, message.data());
             case UPDATE_READY -> roomController.updateReady(session, message.data());
+            case UPDATE_MAP -> roomController.updateMap(session, message.data());
+            case UPDATE_SKIN -> roomController.updateSkin(session, message.data());
         }
     }
 
