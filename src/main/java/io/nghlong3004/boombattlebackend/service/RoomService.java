@@ -36,7 +36,7 @@ public class RoomService {
         return objectMapper.writeValueAsString(roomList);
     }
 
-    public Room join(JoinRoomRequest joinRoomRequest) throws JsonProcessingException {
+    public Room join(JoinRoomRequest joinRoomRequest) {
         var room = rooms.get(joinRoomRequest.id());
         if (room == null || room.getBomberInfos()
                                 .size() == room.getMaxBomber()) {
@@ -72,6 +72,17 @@ public class RoomService {
         var chatMessage = new ChatMessage("System", "%s leave room".formatted(bomberName));
         room.getChatMessages()
             .add(chatMessage);
+        log.info("switch owner in room");
+        if (room.getOwner()
+                .equals(bomberId)) {
+            String newOwner = room.getBomberInfos()
+                                  .getFirst()
+                                  .getId();
+            room.setOwner(newOwner);
+            chatMessage = new ChatMessage("System", "%s become the owner room".formatted(newOwner));
+            room.getChatMessages()
+                .add(chatMessage);
+        }
         return room;
     }
 
