@@ -56,9 +56,19 @@ public class RoomController {
         updateRoom(room);
     }
 
+    public void disconnect(WebSocketSession session) throws IOException {
+        Room room = roomService.leave(session.getId());
+        updateRoom(room);
+    }
+
     public void chat(WebSocketSession session, String data) throws IOException {
         var chatMessageRequest = objectMapper.readValue(data, ChatMessageRequest.class);
         Room room = roomService.chat(chatMessageRequest);
+        updateRoom(room);
+    }
+
+    public void updateReady(WebSocketSession session, String data) throws IOException {
+        Room room = roomService.updateReady(session.getId(), data);
         updateRoom(room);
     }
 

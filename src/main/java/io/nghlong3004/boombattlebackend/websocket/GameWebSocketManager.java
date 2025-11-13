@@ -33,10 +33,12 @@ public class GameWebSocketManager {
             case ROOM_LIST -> roomController.list(session);
             case LEAVE_ROOM -> roomController.leave(session);
             case CHAT_MESSAGE -> roomController.chat(session, message.data());
+            case UPDATE_READY -> roomController.updateReady(session, message.data());
         }
     }
 
-    public void disconnect(WebSocketSession session, CloseStatus status) {
+    public void disconnect(WebSocketSession session, CloseStatus status) throws IOException {
+        roomController.disconnect(session);
         bomberController.disconnect(session, status);
     }
 

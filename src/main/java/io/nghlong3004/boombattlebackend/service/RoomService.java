@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
@@ -54,16 +55,7 @@ public class RoomService {
     }
 
     public Room leave(String bomberId) {
-        log.info("find element contain bomberId: {}", bomberId);
-        var entryOpt = rooms.entrySet()
-                            .stream()
-                            .filter(e -> e.getValue()
-                                          .getBomberInfos()
-                                          .stream()
-                                          .anyMatch(info -> info.getId()
-                                                                .equals(bomberId)))
-                            .findFirst();
-
+        var entryOpt = findRoomByBomberId(bomberId);
         if (entryOpt.isEmpty()) {
             return null;
         }
@@ -71,17 +63,7 @@ public class RoomService {
         var entry = entryOpt.get();
         String roomId = entry.getKey();
         Room room = entry.getValue();
-        String bomberName = null;
-        log.info("get bomber name and remove bomber by bomberId in room");
-        for (var bomberInfo : room.getBomberInfos()) {
-            if (bomberInfo.getId()
-                          .equals(bomberId)) {
-                bomberName = bomberInfo.getName();
-                room.getBomberInfos()
-                    .remove(bomberInfo);
-                break;
-            }
-        }
+        String bomberName = getBomberNameAndRemoveBomberByBomberId(room, bomberId);
 
         log.info("remove room if list bomber info is empty");
         if (room.getBomberInfos()
@@ -109,6 +91,23 @@ public class RoomService {
 
     }
 
+    public Room updateReady(String bomberId, String data) {
+        boolean isReady = "true".contains(data);
+        var entryRoom = findRoomByBomberId(bomberId);
+        if (entryRoom.isEmpty()) {
+            return null;
+        }
+        Room room = entryRoom.get()
+                             .getValue();
+        for (var bomberInfo : room.getBomberInfos()) {
+            if (bomberInfo.getId()
+                          .equals(bomberId)) {
+                bomberInfo.setReady(isReady);
+            }
+        }
+        return room;
+    }
+
     private Room fromCreateRoomRequest(CreateRoomRequest createRoomRequest) {
         String id = String.valueOf(System.currentTimeMillis());
         BomberInfo bomberInfo = new BomberInfo(createRoomRequest.owner(), createRoomRequest.ownerName(),
@@ -123,5 +122,28 @@ public class RoomService {
                    .bomberInfos(bomberInfos)
                    .map(createRoomRequest.mapType())
                    .build();
+    }
+
+    private String getBomberNameAndRemoveBomberByBomberId(Room room, String bomberId) {
+        for (var bomberInfo : room.getBomberInfos()) {
+            if (bomberInfo.getId()
+                          .equals(bomberId)) {
+                room.getBomberInfos()
+                    .remove(bomberInfo);
+                return bomberInfo.getName();
+            }
+        }
+        return null;
+    }
+
+    private Optional<Map.Entry<String, Room>> findRoomByBomberId(String bomberId) {
+        return rooms.entrySet()
+                    .stream()
+                    .filter(e -> e.getValue()
+                                  .getBomberInfos()
+                                  .stream()
+                                  .anyMatch(info -> info.getId()
+                                                        .equals(bomberId)))
+                    .findFirst();
     }
 }
