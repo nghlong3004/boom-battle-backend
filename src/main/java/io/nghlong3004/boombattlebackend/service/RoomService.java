@@ -1,0 +1,99 @@
+package io.nghlong3004.boombattlebackend.service;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.nghlong3004.boombattlebackend.model.game.BomberInfo;
+import io.nghlong3004.boombattlebackend.model.game.Room;
+import io.nghlong3004.boombattlebackend.model.request.CreateRoomRequest;
+import io.nghlong3004.boombattlebackend.model.request.JoinRoomRequest;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class RoomService {
+
+    private final Map<String, Room> rooms = new ConcurrentHashMap<>();
+    private final ObjectMapper objectMapper;
+
+    public String create(CreateRoomRequest createRoomRequest) throws JsonProcessingException {
+        Room room = fromCreateRoomRequest(createRoomRequest);
+        rooms.put(room.getId(), room);
+        log.info("Create room width id: {}", room.getId());
+        return objectMapper.writeValueAsString(room);
+    }
+
+    public String list() throws JsonProcessingException {
+        var roomList = new ArrayList<>(rooms.values());
+        return objectMapper.writeValueAsString(roomList);
+    }
+
+    public Room join(JoinRoomRequest joinRoomRequest) throws JsonProcessingException {
+        var room = rooms.get(joinRoomRequest.id());
+        if (room == null || room.getBomberInfos()
+                                .size() == room.getMaxBomber()) {
+            log.info("Join room is false.");
+            return null;
+        }
+        room.getBomberInfos()
+            .add(joinRoomRequest.bomberInfo());
+        log.info("Join room {}.", room.getId());
+        return room;
+    }
+
+    public Room leave(String bomberId) {
+        log.info("find element contain bomberId: {}", bomberId);
+        var entryOpt = rooms.entrySet()
+                            .stream()
+                            .filter(e -> e.getValue()
+                                          .getBomberInfos()
+                                          .stream()
+                                          .anyMatch(info -> info.getId()
+                                                                .equals(bomberId)))
+                            .findFirst();
+
+        if (entryOpt.isEmpty()) {
+            return null;
+        }
+
+        var entry = entryOpt.get();
+        String roomId = entry.getKey();
+        Room room = entry.getValue();
+        
+        log.info("remove bomber by bomberId in room");
+        room.getBomberInfos()
+            .removeIf(info -> info.getId()
+                                  .equals(bomberId));
+
+        log.info("remove room if list bomber info is empty");
+        if (room.getBomberInfos()
+                .isEmpty()) {
+            rooms.remove(roomId, room);
+            return null;
+        }
+        return room;
+    }
+
+
+    private Room fromCreateRoomRequest(CreateRoomRequest createRoomRequest) {
+        String id = String.valueOf(System.currentTimeMillis());
+        BomberInfo bomberInfo = new BomberInfo(createRoomRequest.owner(), createRoomRequest.ownerName(),
+                                               createRoomRequest.skinType(), true);
+        var bomberInfos = new ArrayList<BomberInfo>();
+        bomberInfos.add(bomberInfo);
+        return Room.builder()
+                   .id(id)
+                   .owner(createRoomRequest.owner())
+                   .name(createRoomRequest.name())
+                   .maxBomber(createRoomRequest.maxBombers())
+                   .bomberInfos(bomberInfos)
+                   .map(createRoomRequest.mapType())
+                   .build();
+    }
+}
