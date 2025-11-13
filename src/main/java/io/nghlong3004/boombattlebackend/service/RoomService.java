@@ -2,9 +2,7 @@ package io.nghlong3004.boombattlebackend.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.nghlong3004.boombattlebackend.model.game.BomberInfo;
-import io.nghlong3004.boombattlebackend.model.game.ChatMessage;
-import io.nghlong3004.boombattlebackend.model.game.Room;
+import io.nghlong3004.boombattlebackend.model.game.*;
 import io.nghlong3004.boombattlebackend.model.request.ChatMessageRequest;
 import io.nghlong3004.boombattlebackend.model.request.CreateRoomRequest;
 import io.nghlong3004.boombattlebackend.model.request.JoinRoomRequest;
@@ -92,20 +90,50 @@ public class RoomService {
     }
 
     public Room updateReady(String bomberId, String data) {
+        log.debug("bomberId {} is ready", bomberId);
         boolean isReady = "true".contains(data);
+        return updateReadyOrMapOrSkin(bomberId, isReady, null, null);
+    }
+
+    public Room updateMap(String bomberId, String data) throws JsonProcessingException {
+        MapType mapType = objectMapper.readValue(data, MapType.class);
+        return updateReadyOrMapOrSkin(bomberId, null, mapType, null);
+    }
+
+    public Room updateSkin(String bomberId, String data) throws JsonProcessingException {
+        log.debug("bomberId: {} is change skin", bomberId);
+        SkinType skinType = objectMapper.readValue(data, SkinType.class);
+        return updateReadyOrMapOrSkin(bomberId, null, null, skinType);
+    }
+
+    private Room updateReadyOrSkin(String bomberId, Boolean isReady, SkinType skinType, Room room) {
+        for (var bomberInfo : room.getBomberInfos()) {
+            if (bomberInfo.getId()
+                          .equals(bomberId)) {
+                if (isReady != null) {
+                    bomberInfo.setReady(isReady);
+                }
+                else if (skinType != null) {
+                    bomberInfo.setSkin(skinType);
+                }
+            }
+        }
+        return room;
+    }
+
+    private Room updateReadyOrMapOrSkin(String bomberId, Boolean isReady, MapType mapType, SkinType skinType) {
         var entryRoom = findRoomByBomberId(bomberId);
         if (entryRoom.isEmpty()) {
             return null;
         }
         Room room = entryRoom.get()
                              .getValue();
-        for (var bomberInfo : room.getBomberInfos()) {
-            if (bomberInfo.getId()
-                          .equals(bomberId)) {
-                bomberInfo.setReady(isReady);
-            }
+        if (mapType != null) {
+            log.debug("roomId: {} update map", room.getId());
+            room.setMap(mapType);
+            return room;
         }
-        return room;
+        return updateReadyOrSkin(bomberId, isReady, skinType, room);
     }
 
     private Room fromCreateRoomRequest(CreateRoomRequest createRoomRequest) {

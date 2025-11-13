@@ -72,6 +72,16 @@ public class RoomController {
         updateRoom(room);
     }
 
+    public void updateMap(WebSocketSession session, String data) throws IOException {
+        Room room = roomService.updateMap(session.getId(), data);
+        updateRoom(room);
+    }
+
+    public void updateSkin(WebSocketSession session, String data) throws IOException {
+        Room room = roomService.updateSkin(session.getId(), data);
+        updateRoom(room);
+    }
+
     private void updateRoom(Room room) throws IOException {
         if (room == null) {
             return;
