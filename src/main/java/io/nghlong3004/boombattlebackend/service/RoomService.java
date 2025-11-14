@@ -69,7 +69,7 @@ public class RoomService {
             rooms.remove(roomId, room);
             return null;
         }
-        var chatMessage = new ChatMessage("System", "%s leave room".formatted(bomberName));
+        var chatMessage = new ChatMessage("System", "%s left the room".formatted(bomberName));
         room.getChatMessages()
             .add(chatMessage);
         log.info("switch owner in room");
@@ -79,7 +79,9 @@ public class RoomService {
                                   .getFirst()
                                   .getId();
             room.setOwner(newOwner);
-            chatMessage = new ChatMessage("System", "%s become the owner room".formatted(newOwner));
+            chatMessage = new ChatMessage("System", "%s becomes the room owner.".formatted(room.getBomberInfos()
+                                                                                               .getFirst()
+                                                                                               .getName()));
             room.getChatMessages()
                 .add(chatMessage);
         }
