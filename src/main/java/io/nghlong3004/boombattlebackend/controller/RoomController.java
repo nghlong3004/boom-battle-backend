@@ -82,15 +82,31 @@ public class RoomController {
         updateRoom(room);
     }
 
+    public void startGame(WebSocketSession session) throws IOException {
+        Message message = new Message(MessageType.START_GAME, "");
+        Room room = roomService.startGame(session.getId());
+        update(room, message);
+    }
+
+    public void action(WebSocketSession session, String data) throws IOException {
+        Message message = new Message(MessageType.BOMBER_ACTION, data);
+        Room room = roomService.action(session.getId());
+        update(room, message);
+    }
+
     private void updateRoom(Room room) throws IOException {
+        String dataResponse = objectMapper.writeValueAsString(room);
+        Message message = new Message(MessageType.ROOM_UPDATE, dataResponse);
+        update(room, message);
+    }
+
+    private void update(Room room, Message message) throws IOException {
         if (room == null) {
             return;
         }
-        String dataResponse = objectMapper.writeValueAsString(room);
         for (var bomberInfo : room.getBomberInfos()) {
             var session = getSessionByBomberId(bomberInfo.getId());
             if (session != null) {
-                Message message = new Message(MessageType.ROOM_UPDATE, dataResponse);
                 response(session, message);
             }
         }
@@ -98,7 +114,7 @@ public class RoomController {
 
     private void response(WebSocketSession session, Message message) throws IOException {
         String json = objectMapper.writeValueAsString(message);
-        log.info("Reply: {}", json);
+        log.info("Reply with id{}: {}", session.getId(), json);
         session.sendMessage(new TextMessage(json));
     }
 

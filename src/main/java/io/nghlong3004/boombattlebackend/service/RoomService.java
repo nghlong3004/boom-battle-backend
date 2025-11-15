@@ -119,6 +119,21 @@ public class RoomService {
         return updateReadyOrMapOrSkin(bomberId, null, null, skinType);
     }
 
+    public Room startGame(String bomberId) {
+        log.debug("Start game with bomberId: {}", bomberId);
+        return getRoomByBomberId(bomberId);
+    }
+
+    public Room action(String bomberId) {
+        return getRoomByBomberId(bomberId);
+    }
+
+    private Room getRoomByBomberId(String bomberId) {
+        var entryRoom = findRoomByBomberId(bomberId);
+        return entryRoom.map(Map.Entry::getValue)
+                        .orElse(null);
+    }
+
     private Room updateReadyOrSkin(String bomberId, Boolean isReady, SkinType skinType, Room room) {
         for (var bomberInfo : room.getBomberInfos()) {
             if (bomberInfo.getId()

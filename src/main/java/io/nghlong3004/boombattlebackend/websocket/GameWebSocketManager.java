@@ -36,6 +36,8 @@ public class GameWebSocketManager {
             case UPDATE_READY -> roomController.updateReady(session, message.data());
             case UPDATE_MAP -> roomController.updateMap(session, message.data());
             case UPDATE_SKIN -> roomController.updateSkin(session, message.data());
+            case START_GAME -> roomController.startGame(session);
+            case BOMBER_ACTION -> roomController.action(session, message.data());
         }
     }
 
