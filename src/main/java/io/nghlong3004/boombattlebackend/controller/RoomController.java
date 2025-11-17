@@ -1,13 +1,15 @@
 package io.nghlong3004.boombattlebackend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.nghlong3004.boombattlebackend.model.Message;
 import io.nghlong3004.boombattlebackend.model.MessageType;
+import io.nghlong3004.boombattlebackend.model.game.MapType;
 import io.nghlong3004.boombattlebackend.model.game.Room;
 import io.nghlong3004.boombattlebackend.model.request.ChatMessageRequest;
 import io.nghlong3004.boombattlebackend.model.request.CreateRoomRequest;
 import io.nghlong3004.boombattlebackend.model.request.JoinRoomRequest;
+import io.nghlong3004.boombattlebackend.model.response.MessageResponse;
 import io.nghlong3004.boombattlebackend.service.BomberService;
+import io.nghlong3004.boombattlebackend.service.GameMapService;
 import io.nghlong3004.boombattlebackend.service.RoomService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,19 +25,20 @@ import java.io.IOException;
 public class RoomController {
 
     private final BomberService bomberService;
+    private final GameMapService gameMapService;
     private final RoomService roomService;
     private final ObjectMapper objectMapper;
 
     public void create(WebSocketSession session, String data) throws IOException {
         CreateRoomRequest createRoomRequest = objectMapper.readValue(data, CreateRoomRequest.class);
         String dataResponse = roomService.create(createRoomRequest);
-        Message message = new Message(MessageType.CREATE_ROOM, dataResponse);
+        MessageResponse message = new MessageResponse(MessageType.CREATE_ROOM, dataResponse);
         response(session, message);
     }
 
     public void list(WebSocketSession session) throws IOException {
         String dataResponse = roomService.list();
-        Message message = new Message(MessageType.ROOM_LIST, dataResponse);
+        MessageResponse message = new MessageResponse(MessageType.ROOM_LIST, dataResponse);
         response(session, message);
     }
 
@@ -50,7 +53,7 @@ public class RoomController {
     }
 
     public void leave(WebSocketSession session) throws IOException {
-        Message message = new Message(MessageType.LEAVE_ROOM, "");
+        MessageResponse message = new MessageResponse(MessageType.LEAVE_ROOM, "");
         response(session, message);
         Room room = roomService.leave(session.getId());
         updateRoom(room);
@@ -82,25 +85,29 @@ public class RoomController {
         updateRoom(room);
     }
 
-    public void startGame(WebSocketSession session) throws IOException {
-        Message message = new Message(MessageType.START_GAME, "");
+    public void startGame(WebSocketSession session, String data) throws IOException {
+        MapType mapType = objectMapper.readValue(data, MapType.class);
+        MessageResponse message = gameMapService.getMapAndBomberSpawnsAndItemSpawns(mapType);
         Room room = roomService.startGame(session.getId());
-        update(room, message);
+        updateAllBomberByRoom(room, message);
     }
 
     public void action(WebSocketSession session, String data) throws IOException {
-        Message message = new Message(MessageType.BOMBER_ACTION, data);
+        MessageResponse message = new MessageResponse(MessageType.BOMBER_ACTION, data);
         Room room = roomService.action(session.getId());
-        update(room, message);
+        updateAllBomberByRoom(room, message);
     }
 
     private void updateRoom(Room room) throws IOException {
+        if (room == null) {
+            return;
+        }
         String dataResponse = objectMapper.writeValueAsString(room);
-        Message message = new Message(MessageType.ROOM_UPDATE, dataResponse);
-        update(room, message);
+        MessageResponse message = new MessageResponse(MessageType.ROOM_UPDATE, dataResponse);
+        updateAllBomberByRoom(room, message);
     }
 
-    private void update(Room room, Message message) throws IOException {
+    private void updateAllBomberByRoom(Room room, MessageResponse message) throws IOException {
         if (room == null) {
             return;
         }
@@ -112,7 +119,7 @@ public class RoomController {
         }
     }
 
-    private void response(WebSocketSession session, Message message) throws IOException {
+    private void response(WebSocketSession session, MessageResponse message) throws IOException {
         String json = objectMapper.writeValueAsString(message);
         log.info("Reply with id{}: {}", session.getId(), json);
         session.sendMessage(new TextMessage(json));

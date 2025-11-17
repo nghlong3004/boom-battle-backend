@@ -2,8 +2,8 @@ package io.nghlong3004.boombattlebackend.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.nghlong3004.boombattlebackend.model.Message;
 import io.nghlong3004.boombattlebackend.model.MessageType;
+import io.nghlong3004.boombattlebackend.model.response.MessageResponse;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,7 @@ public class BomberService {
 
     public String connect(WebSocketSession session) throws JsonProcessingException {
         sessions.add(session);
-        var message = new Message(MessageType.CONNECT, session.getId());
+        var message = new MessageResponse(MessageType.CONNECT, session.getId());
         log.info("Client with sessionId:{} connecting", session.getId());
         return mapper.writeValueAsString(message);
     }

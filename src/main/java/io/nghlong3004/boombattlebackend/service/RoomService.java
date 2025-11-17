@@ -158,6 +158,10 @@ public class RoomService {
         Room room = entryRoom.get()
                              .getValue();
         if (mapType != null) {
+            if (!room.getOwner()
+                     .equals(bomberId)) {
+                return null;
+            }
             log.debug("roomId: {} update map", room.getId());
             room.setMap(mapType);
             return room;

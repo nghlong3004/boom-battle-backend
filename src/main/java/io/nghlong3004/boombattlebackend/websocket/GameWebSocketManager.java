@@ -3,7 +3,7 @@ package io.nghlong3004.boombattlebackend.websocket;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.nghlong3004.boombattlebackend.controller.BomberController;
 import io.nghlong3004.boombattlebackend.controller.RoomController;
-import io.nghlong3004.boombattlebackend.model.Message;
+import io.nghlong3004.boombattlebackend.model.response.MessageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -26,7 +26,7 @@ public class GameWebSocketManager {
     }
 
     public void managerMessage(WebSocketSession session, TextMessage textMessage) throws IOException {
-        Message message = mapper.readValue(textMessage.getPayload(), Message.class);
+        MessageResponse message = mapper.readValue(textMessage.getPayload(), MessageResponse.class);
         switch (message.type()) {
             case CREATE_ROOM -> roomController.create(session, message.data());
             case JOIN_ROOM -> roomController.join(session, message.data());
@@ -36,7 +36,7 @@ public class GameWebSocketManager {
             case UPDATE_READY -> roomController.updateReady(session, message.data());
             case UPDATE_MAP -> roomController.updateMap(session, message.data());
             case UPDATE_SKIN -> roomController.updateSkin(session, message.data());
-            case START_GAME -> roomController.startGame(session);
+            case START_GAME -> roomController.startGame(session, message.data());
             case BOMBER_ACTION -> roomController.action(session, message.data());
         }
     }
